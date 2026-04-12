@@ -1,159 +1,156 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 
-const PARTICLE_COUNT = 90;
-const MAX_DIST = 160;
-const MOUSE_RADIUS = 180;
-const SPEED = 0.45;
+/* ─── Tuning constants ─────────────────────────────────────
+ * Reducing particle count and connection distance are the
+ * two biggest levers for performance.
+ * N=50 → ~1225 pair checks/frame  (vs 4050 at N=90)
+ * MAX_DIST=120 → fewer lines drawn each frame
+ * DPR capped at 1 → avoids 2× pixel budget on Retina screens
+ * TARGET_FPS=40 → ~25 ms/frame budget, skips excess frames
+ * ─────────────────────────────────────────────────────────*/
+const N           = 50;
+const MAX_DIST    = 120;
+const MAX_DIST_SQ = MAX_DIST * MAX_DIST;   // avoid sqrt in hot loop
+const SPEED       = 0.4;
+const TARGET_FPS  = 40;
+const FRAME_MS    = 1000 / TARGET_FPS;
+const MAX_DPR     = 1;                     // cap pixel ratio
 
-function rand(min, max) { return Math.random() * (max - min) + min; }
+function rand(a, b) { return Math.random() * (b - a) + a; }
 
 export default function ParticleBackground({ paused }) {
-  const canvasRef = useRef(null);
-  const frameRef  = useRef(null);
-  const particles = useRef([]);
-  const mouse     = useRef({ x: -9999, y: -9999 });
-  const pausedRef = useRef(paused);
+  const canvasRef  = useRef(null);
+  const stateRef   = useRef({
+    particles: [],
+    pausedRef: paused,
+    frameId:   null,
+    lastTs:    0,
+    W: 0, H: 0,
+    /* cached gradient objects — rebuilt only on resize */
+    bgGrad:      null,
+    vigGrad:     null,
+  });
 
-  useEffect(() => { pausedRef.current = paused; }, [paused]);
+  /* keep paused flag in sync without re-creating effects */
+  useEffect(() => { stateRef.current.pausedRef = paused; }, [paused]);
 
-  const initParticles = useCallback((W, H) => {
-    particles.current = Array.from({ length: PARTICLE_COUNT }, () => ({
-      x:  rand(0, W), y:  rand(0, H),
-      vx: rand(-SPEED, SPEED), vy: rand(-SPEED, SPEED),
-      r:  rand(1.5, 3),
-    }));
-  }, []);
-
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width  / window.devicePixelRatio;
-    const H = canvas.height / window.devicePixelRatio;
-
-    /* background */
-    const bg = ctx.createLinearGradient(0, 0, W * 0.6, H);
-    bg.addColorStop(0, "#0f1128");
-    bg.addColorStop(1, "#07080f");
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
-
-    const pts = particles.current;
-    const mx  = mouse.current.x;
-    const my  = mouse.current.y;
-
-    /* move */
-    if (!pausedRef.current) {
-      for (const p of pts) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > W) p.vx *= -1;
-        if (p.y < 0 || p.y > H) p.vy *= -1;
-
-        /* mouse repulsion */
-        const dx = p.x - mx;
-        const dy = p.y - my;
-        const d  = Math.sqrt(dx * dx + dy * dy);
-        if (d < MOUSE_RADIUS && d > 0) {
-          const force = (MOUSE_RADIUS - d) / MOUSE_RADIUS * 0.8;
-          p.x += (dx / d) * force * 3.5;
-          p.y += (dy / d) * force * 3.5;
-        }
-      }
-    }
-
-    /* lines between nearby particles */
-    for (let i = 0; i < pts.length; i++) {
-      for (let j = i + 1; j < pts.length; j++) {
-        const dx = pts[i].x - pts[j].x;
-        const dy = pts[i].y - pts[j].y;
-        const d  = Math.sqrt(dx * dx + dy * dy);
-        if (d < MAX_DIST) {
-          const alpha = (1 - d / MAX_DIST) * 0.55;
-          ctx.beginPath();
-          ctx.moveTo(pts[i].x, pts[i].y);
-          ctx.lineTo(pts[j].x, pts[j].y);
-          ctx.strokeStyle = `rgba(201,168,76,${alpha})`;
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        }
-      }
-      /* lines from mouse to nearby particles */
-      const dx = pts[i].x - mx;
-      const dy = pts[i].y - my;
-      const d  = Math.sqrt(dx * dx + dy * dy);
-      if (d < MOUSE_RADIUS) {
-        const alpha = (1 - d / MOUSE_RADIUS) * 0.7;
-        ctx.beginPath();
-        ctx.moveTo(pts[i].x, pts[i].y);
-        ctx.lineTo(mx, my);
-        ctx.strokeStyle = `rgba(232,201,122,${alpha})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-    }
-
-    /* dots */
-    for (const p of pts) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(201,168,76,0.8)";
-      ctx.fill();
-    }
-
-    /* soft vignette */
-    const vignette = ctx.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, H*0.85);
-    vignette.addColorStop(0, "rgba(0,0,0,0)");
-    vignette.addColorStop(1, "rgba(0,0,0,0.55)");
-    ctx.fillStyle = vignette;
-    ctx.fillRect(0, 0, W, H);
-  }, []);
-
-  /* resize + init */
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const W = canvas.offsetWidth;
-      const H = canvas.offsetHeight;
+    const s   = stateRef.current;
+    const ctx = canvas.getContext("2d", { alpha: false });
+
+    /* ── resize ── */
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+      const W   = canvas.offsetWidth;
+      const H   = canvas.offsetHeight;
       canvas.width  = W * dpr;
       canvas.height = H * dpr;
-      const ctx = canvas.getContext("2d");
-      ctx.scale(dpr, dpr);
-      initParticles(W, H);
-    };
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      s.W = W; s.H = H;
+
+      /* rebuild cached gradients */
+      s.bgGrad = ctx.createLinearGradient(0, 0, W * 0.5, H);
+      s.bgGrad.addColorStop(0, "#0f1128");
+      s.bgGrad.addColorStop(1, "#07080f");
+
+      s.vigGrad = ctx.createRadialGradient(W/2, H/2, H*0.25, W/2, H/2, H*0.85);
+      s.vigGrad.addColorStop(0, "rgba(0,0,0,0)");
+      s.vigGrad.addColorStop(1, "rgba(0,0,0,0.5)");
+
+      /* reinitialise particles */
+      s.particles = Array.from({ length: N }, () => ({
+        x:  rand(0, W), y:  rand(0, H),
+        vx: rand(-SPEED, SPEED) || SPEED,
+        vy: rand(-SPEED, SPEED) || SPEED,
+        r:  rand(1.4, 2.6),
+      }));
+    }
+
+    /* ── draw ── */
+    function draw(ts) {
+      /* frame-rate throttle */
+      if (ts - s.lastTs < FRAME_MS) {
+        s.frameId = requestAnimationFrame(draw);
+        return;
+      }
+      s.lastTs = ts;
+
+      const { W, H, particles, pausedRef, bgGrad, vigGrad } = s;
+
+      /* background */
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      /* move particles */
+      if (!pausedRef) {
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0)  { p.x  = 0;  p.vx = Math.abs(p.vx); }
+          if (p.x > W)  { p.x  = W;  p.vx = -Math.abs(p.vx); }
+          if (p.y < 0)  { p.y  = 0;  p.vy = Math.abs(p.vy); }
+          if (p.y > H)  { p.y  = H;  p.vy = -Math.abs(p.vy); }
+        }
+      }
+
+      /* ── lines — batched by alpha bucket for fewer strokeStyle changes ──
+       * We bucket opacity into 4 levels so we only call ctx.stroke() once
+       * per bucket instead of once per line — cuts draw calls ~75 %.       */
+      const BUCKETS = 4;
+      const paths   = Array.from({ length: BUCKETS }, () => new Path2D());
+
+      for (let i = 0; i < particles.length - 1; i++) {
+        const ax = particles[i].x;
+        const ay = particles[i].y;
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = ax - particles[j].x;
+          const dy = ay - particles[j].y;
+          const dSq = dx * dx + dy * dy;
+          if (dSq < MAX_DIST_SQ) {
+            const t      = dSq / MAX_DIST_SQ;          // 0 (close) → 1 (far)
+            const bucket = Math.min(BUCKETS - 1, (t * BUCKETS) | 0);
+            paths[bucket].moveTo(ax, ay);
+            paths[bucket].lineTo(particles[j].x, particles[j].y);
+          }
+        }
+      }
+
+      ctx.lineWidth = 0.8;
+      const alphas = [0.5, 0.35, 0.2, 0.08];
+      for (let b = 0; b < BUCKETS; b++) {
+        ctx.strokeStyle = `rgba(201,168,76,${alphas[b]})`;
+        ctx.stroke(paths[b]);
+      }
+
+      /* ── dots — single batch fill ── */
+      ctx.fillStyle = "rgba(201,168,76,0.85)";
+      ctx.beginPath();
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        ctx.moveTo(p.x + p.r, p.y);
+        ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+      }
+      ctx.fill();
+
+      /* vignette overlay */
+      ctx.fillStyle = vigGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      s.frameId = requestAnimationFrame(draw);
+    }
+
     resize();
     window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
-  }, [initParticles]);
+    s.frameId = requestAnimationFrame(draw);
 
-  /* animation loop */
-  useEffect(() => {
-    const loop = () => {
-      draw();
-      frameRef.current = requestAnimationFrame(loop);
-    };
-    frameRef.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [draw]);
-
-  /* mouse tracking */
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const onMove = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    };
-    const onLeave = () => { mouse.current = { x: -9999, y: -9999 }; };
-    canvas.addEventListener("mousemove", onMove);
-    canvas.addEventListener("mouseleave", onLeave);
     return () => {
-      canvas.removeEventListener("mousemove", onMove);
-      canvas.removeEventListener("mouseleave", onLeave);
+      cancelAnimationFrame(s.frameId);
+      window.removeEventListener("resize", resize);
     };
-  }, []);
+  }, []); /* run once — paused state is read via ref */
 
   return (
     <canvas
@@ -161,7 +158,7 @@ export default function ParticleBackground({ paused }) {
       style={{
         position: "absolute", inset: 0,
         width: "100%", height: "100%",
-        display: "block", cursor: "crosshair",
+        display: "block",
       }}
     />
   );
