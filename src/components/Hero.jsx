@@ -109,14 +109,6 @@ export default function Hero({ onContact }) {
         </h1>
 
         <p style={{
-          fontSize: "clamp(1.05rem, 2.2vw, 1.5rem)",
-          fontWeight: 400, color: "#e8c97a",
-          fontStyle: "italic", marginBottom: "1.2rem",
-        }}>
-          Your Vision, Our Solution.
-        </p>
-
-        <p style={{
           fontSize: "clamp(0.88rem, 1.3vw, 1rem)",
           color: "rgba(255,255,255,0.65)",
           lineHeight: 1.82, marginBottom: "2.4rem",

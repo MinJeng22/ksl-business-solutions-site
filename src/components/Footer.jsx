@@ -60,7 +60,9 @@ export default function Footer() {
 
           {/* ── Brand col ── */}
           <div className="footer-brand-col">
-            {/* dark-bg version: invert logo to all-white */}
+            {/* FOOTER LOGO
+               * To swap: replace  src/assets/logos/ksl_logo.png
+               * Filter inverts colours so logo reads white on the dark footer bg */}
             <img
               src={LOGO}
               alt="KSL Business Solutions"

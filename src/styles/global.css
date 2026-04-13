@@ -20,7 +20,7 @@
   /* ── Generous horizontal whitespace ──
    * clamp(min, preferred, max)
    * Desktop: up to 96px each side (192px total) for breathing room */
-  --px: clamp(24px, 8vw, 112px);
+  --px: clamp(24px, 10vw, 140px);
 }
 
 html { scroll-behavior: smooth; }

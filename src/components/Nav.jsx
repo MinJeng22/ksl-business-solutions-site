@@ -38,7 +38,9 @@ export default function Nav({ onContact }) {
         pointerEvents: visible ? "auto" : "none",
       }}
     >
-      {/* Logo with purple text (no filter override — natural logo colors) */}
+      {/* NAV LOGO
+         * To swap: replace  src/assets/logos/ksl_logo.png
+         * Natural logo colours are used here (no filter) */}
       <img
         src={LOGO}
         alt="KSL Business Solutions"
