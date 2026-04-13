@@ -75,7 +75,6 @@ function PartnerSlot({ partner }) {
         </span>
       )}
     </div>
-    </div>
   );
 }
 
