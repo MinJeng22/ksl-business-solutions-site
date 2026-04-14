@@ -20,10 +20,16 @@
  * MAIN LOGO
  * Used in: Hero (animated BG), Nav (header), Footer
  * To replace: swap the file at  src/assets/logos/ksl_logo.png
- * ══════════════════════════════════════════════════════════════ */
-import kslLogo from "./logos/ksl_logo.png";
-export const LOGO = kslLogo;
 
+import kslLogo    from "./logos/ksl_logo.png";
+import logoHero   from "./logos/logo_hero.png";
+import logoNav    from "./logos/logo_nav.png";
+import logoFooter from "./logos/logo_footer.png";
+
+export const LOGO = kslLogo;
+export const LOGO_HERO = logoHero; 
+export const LOGO_NAV = logoNav;
+export const LOGO_FOOTER = logoFooter;
 /* ══════════════════════════════════════════════════════════════
  * PARTNER LOGOS  (6 slots)
  * To replace a partner logo:
@@ -51,15 +57,15 @@ export const PARTNER_LOGOS = {
  * To replace: drop file into  src/assets/images/  and rename
  * ══════════════════════════════════════════════════════════════ */
 import caseNetworking from "./images/case-networking.jpg";
-import casePlugin     from "./images/case-plugin.jpg";
-import caseErp        from "./images/case-erp.jpg";
-import caseWarehouse  from "./images/case-warehouse.jpg";
+import casePlugin from "./images/case-plugin.jpg";
+import caseErp from "./images/case-erp.jpg";
+import caseWarehouse from "./images/case-warehouse.jpg";
 
 export const CASE_IMAGES = {
   networking: caseNetworking,
-  plugin:     casePlugin,
-  erp:        caseErp,
-  warehouse:  caseWarehouse,
+  plugin: casePlugin,
+  erp: caseErp,
+  warehouse: caseWarehouse,
 };
 
 /* ══════════════════════════════════════════════════════════════
@@ -76,7 +82,7 @@ export const CASE_IMAGES = {
 
 export const PRODUCT_IMAGES = {
   autocountAccounting: null,   /* ← replace null with imported variable */
-  autocountPos:        null,
-  autocountPayroll:    null,
-  feedmePOS:           null,
+  autocountPos: null,
+  autocountPayroll: null,
+  feedmePOS: null,
 };
