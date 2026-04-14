@@ -20,14 +20,14 @@
  * MAIN LOGO
  * Used in: Hero (animated BG), Nav (header), Footer
  * To replace: swap the file at  src/assets/logos/ksl_logo.png
-
-import kslLogo    from "./logos/ksl_logo.png";
-import logoHero   from "./logos/logo_hero.png";
-import logoNav    from "./logos/logo_nav.png";
+══════════════════════════════════════════════════════════════*/
+import kslLogo from "./logos/ksl_logo.png";
+import logoHero from "./logos/logo_hero.png";
+import logoNav from "./logos/logo_nav.png";
 import logoFooter from "./logos/logo_footer.png";
 
 export const LOGO = kslLogo;
-export const LOGO_HERO = logoHero; 
+export const LOGO_HERO = logoHero;
 export const LOGO_NAV = logoNav;
 export const LOGO_FOOTER = logoFooter;
 /* ══════════════════════════════════════════════════════════════
