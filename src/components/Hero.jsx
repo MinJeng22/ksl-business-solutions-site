@@ -2,13 +2,6 @@ import { useState, useEffect } from "react";
 import ParticleBackground from "./ParticleBackground";
 import { LOGO_HERO } from "../assets/assets.js";
 
-/* ══════════════════════════════════════════════════════════════
- * HERO LOGO
- * To swap: replace  src/assets/logos/logo-hero.png
- * filter: brightness(0) invert(1) — renders every pixel white,
- * no background box needed on the dark animated canvas.
- * ══════════════════════════════════════════════════════════════ */
-
 export default function Hero({ onContact }) {
   const [paused, setPaused]   = useState(false);
   const [visible, setVisible] = useState(false);
@@ -18,7 +11,7 @@ export default function Hero({ onContact }) {
     return () => clearTimeout(t);
   }, []);
 
-  const logoH = "clamp(90px, 13vw, 155px)";
+  const logoH = "clamp(80px, 11vw, 140px)";
 
   return (
     <section
@@ -26,45 +19,62 @@ export default function Hero({ onContact }) {
       style={{
         position: "relative",
         minHeight: "100vh",
+        /* Full-height flex column so logo sits top-left,
+           text block sits bottom-left, with breathing room between */
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         overflow: "hidden",
       }}
     >
       <ParticleBackground paused={paused} />
 
-      {/* content-wrap constrains width and adds side padding — same as all other sections */}
-      <div className="content-wrap" style={{ position: "relative", zIndex: 2, width: "100%" }}>
+      <div
+        className="content-wrap"
+        style={{
+          position: "relative", zIndex: 2,
+          width: "100%",
+          /* Take full section height so we can push text to bottom */
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          /* Logo top, text block pushed to lower area */
+          justifyContent: "space-between",
+          paddingTop: "clamp(100px, 14vh, 160px)",
+          paddingBottom: "clamp(60px, 10vh, 100px)",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(28px)",
+          transition: "opacity 1.1s ease, transform 1.1s ease",
+        }}
+      >
+        {/* ── Logo — top of the column ── */}
+        <div style={{ marginBottom: "auto" }}>
+          <a href="/" onClick={() => window.scrollTo(0, 0)} style={{ display: "inline-block" }}>
+            <img
+              src={LOGO_HERO}
+              alt="KSL Business Solutions"
+              style={{
+                height: logoH,
+                objectFit: "contain",
+                display: "block",
+                filter: "brightness(0) invert(1)",
+              }}
+            />
+          </a>
+        </div>
+
+        {/* ── Text block — bottom-left, with gap from logo ── */}
         <div
           className="hero-content"
           style={{
             display: "flex", flexDirection: "column",
             alignItems: "flex-start", textAlign: "left",
-            maxWidth: 580,
-            marginTop: "-6vh",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(28px)",
-            transition: "opacity 1.1s ease, transform 1.1s ease",
+            maxWidth: 560,
+            /* Space between logo and text */
+            paddingTop: "clamp(2rem, 6vh, 4rem)",
           }}
         >
-          {/* ── Hero Logo — full white, no background box ── */}
-          <div style={{ marginBottom: "2.2rem" }}>
-            <a href="/" onClick={() => window.scrollTo(0, 0)} style={{ display: "inline-block" }}>
-              <img
-                src={LOGO_HERO}
-                alt="KSL Business Solutions"
-                style={{
-                  height: logoH,
-                  objectFit: "contain",
-                  display: "block",
-                  filter: "brightness(0) invert(1)",
-                }}
-              />
-            </a>
-          </div>
-
           {/* Badge */}
           <div style={{
             display: "inline-flex", alignItems: "center",
@@ -72,7 +82,7 @@ export default function Hero({ onContact }) {
             border: "1px solid rgba(201,168,76,0.4)",
             color: "#e8c97a",
             fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.13em",
-            padding: "0.35rem 1.1rem", borderRadius: 50, marginBottom: "1.4rem",
+            padding: "0.35rem 1.1rem", borderRadius: 50, marginBottom: "1.2rem",
             textTransform: "uppercase",
           }}>
             Pahang's No. 1 AutoCount Authorized Dealer
@@ -87,20 +97,18 @@ export default function Hero({ onContact }) {
             Hello.
           </h1>
 
-          {/* Slogan */}
           <p style={{
             fontSize: "clamp(1.05rem, 2.2vw, 1.45rem)",
             fontWeight: 400, color: "#e8c97a",
-            fontStyle: "italic", marginBottom: "1.2rem",
+            fontStyle: "italic", marginBottom: "1.1rem",
           }}>
             Your Vision, Our Solutions.
           </p>
 
-          {/* Updated company description */}
           <p style={{
             fontSize: "clamp(0.88rem, 1.3vw, 1rem)",
             color: "rgba(255,255,255,0.65)",
-            lineHeight: 1.82, marginBottom: "2.4rem",
+            lineHeight: 1.82, marginBottom: "2rem",
           }}>
             K.S. Leow Group, established in 1981, provides a comprehensive suite
             of services including accounting, secretarial, taxation, management,
@@ -108,14 +116,16 @@ export default function Hero({ onContact }) {
             and training — all under one roof.
           </p>
 
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          {/* Buttons — always side-by-side (no wrap) */}
+          <div className="hero-btns" style={{ display: "flex", gap: "0.85rem", flexWrap: "nowrap" }}>
             <button
               onClick={onContact}
               style={{
                 background: "#c9a84c", color: "#1e2040",
-                padding: "0.82rem 2.2rem", borderRadius: 50,
-                fontSize: "0.92rem", fontWeight: 700,
+                padding: "0.75rem 1.75rem", borderRadius: 50,
+                fontSize: "0.88rem", fontWeight: 700,
                 border: "none", cursor: "pointer", fontFamily: "inherit",
+                whiteSpace: "nowrap",
                 transition: "opacity 0.2s",
               }}
               onMouseOver={e => e.currentTarget.style.opacity = "0.85"}
@@ -128,9 +138,10 @@ export default function Hero({ onContact }) {
               style={{
                 background: "transparent", color: "#ffffff",
                 border: "1.5px solid rgba(255,255,255,0.35)",
-                padding: "0.82rem 2.2rem", borderRadius: 50,
-                fontSize: "0.92rem", fontWeight: 500,
-                textDecoration: "none", transition: "border-color 0.2s",
+                padding: "0.75rem 1.75rem", borderRadius: 50,
+                fontSize: "0.88rem", fontWeight: 500,
+                textDecoration: "none", whiteSpace: "nowrap",
+                transition: "border-color 0.2s", display: "inline-block",
               }}
               onMouseOver={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.82)"}
               onMouseOut={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.35)"}
