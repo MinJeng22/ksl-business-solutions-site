@@ -16,7 +16,7 @@ import { useState, useRef, useEffect } from "react";
  * ══════════════════════════════════════════════════════════════ */
 
 /* ── CONFIG — set your Cloudflare Worker URL here ── */
-const WORKER_URL = "https://ksl-omni.chiaminjeng.workers.dev";
+const WORKER_URL = "https://ksl-omni.chiaminjeng.workers.dev/chat";
 /* ── SYSTEM PROMPT — customise the AI's persona ── */
 const SYSTEM_PROMPT = `You are a helpful assistant for KSL Business Solutions Sdn. Bhd., 
 specialising in AutoCount Accounting plugins, especially the Sales2DO plugin. 
@@ -75,30 +75,30 @@ async function uploadImage(file) {
 /* ── Icons ── */
 const SendIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
   </svg>
 );
 const ImageIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-    <polyline points="21 15 16 10 5 21"/>
+    <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
   </svg>
 );
 const BotIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="3" width="20" height="14" rx="2"/>
-    <line x1="8" y1="21" x2="16" y2="21"/>
-    <line x1="12" y1="17" x2="12" y2="21"/>
+    <rect x="2" y="3" width="20" height="14" rx="2" />
+    <line x1="8" y1="21" x2="16" y2="21" />
+    <line x1="12" y1="17" x2="12" y2="21" />
   </svg>
 );
 const CloseIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 const XIcon = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
@@ -177,15 +177,15 @@ export default function AIChatbot() {
       text: "Hi! I'm the Sales2DO assistant powered by Gemini AI. Ask me anything about the plugin — installation, usage, settings, or licensing. You can also send a screenshot for help! 😊",
     },
   ]);
-  const [input, setInput]     = useState("");
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  const bottomRef  = useRef(null);
-  const fileRef    = useRef(null);
-  const inputRef   = useRef(null);
-  const abortRef   = useRef(null);
+  const bottomRef = useRef(null);
+  const fileRef = useRef(null);
+  const inputRef = useRef(null);
+  const abortRef = useRef(null);
 
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 100);
@@ -437,7 +437,7 @@ export default function AIChatbot() {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 flexShrink: 0, transition: "border-color 0.2s, color 0.2s",
               }}
-              onMouseOver={e => { if (!loading) { e.currentTarget.style.borderColor = "#2f315a"; e.currentTarget.style.color = "#2f315a"; }}}
+              onMouseOver={e => { if (!loading) { e.currentTarget.style.borderColor = "#2f315a"; e.currentTarget.style.color = "#2f315a"; } }}
               onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(47,49,90,0.18)"; e.currentTarget.style.color = "#6b6f91"; }}
             >
               <ImageIcon />
