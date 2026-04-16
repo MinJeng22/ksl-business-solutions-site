@@ -46,7 +46,7 @@ import imgStep6 from "../../assets/images/cases/sales2do/step6.png";
 // import imgCopy1         from "../../assets/images/cases/sales2do/copy1.png";
 // import imgCopy2         from "../../assets/images/cases/sales2do/copy2.png";
 // import imgCopy3         from "../../assets/images/cases/sales2do/copy3.png";
-import imgOutstanding from "../../assets/images/cases/sales2do/outstanding.png";
+// import imgOutstanding from "../../assets/images/cases/sales2do/outstanding.png";
 import imgSettings from "../../assets/images/cases/sales2do/settings.png";
 import imgLicenseOnline from "../../assets/images/cases/sales2do/license-online.png";
 import imgLicenseOffline from "../../assets/images/cases/sales2do/license-offline.png";
