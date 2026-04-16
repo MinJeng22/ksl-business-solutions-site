@@ -167,7 +167,7 @@ export default function AIChatbot() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      text: "Hello! I'm the exclusive assistant for the Sales2DO plugin by KSL Business Solutions. Ask me anything about installation, features, pricing, or licensing. 😊",
+      text: "Hello! Ask me anything about the plugin installation, features, pricing, or licensing. 😊",
     },
   ]);
   const [input, setInput] = useState("");
