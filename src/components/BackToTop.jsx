@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
 
-/* ══════════════════════════════════════════════════════════════
- * BackToTop — Fixed bottom-right button, visible after 400px scroll
- * Add <BackToTop /> to App.jsx once; it appears on every page.
- * ══════════════════════════════════════════════════════════════ */
 export default function BackToTop() {
   const [visible, setVisible] = useState(false);
 
@@ -13,24 +9,23 @@ export default function BackToTop() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
   return (
     <button
-      onClick={scrollTop}
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="Back to top"
       title="Back to top"
       style={{
         position: "fixed",
-        bottom: 28,
+        /* Sits above the AI chatbot FAB (28 + 52 + 8 = 88) */
+        bottom: 88,
         right: 28,
         zIndex: 500,
         width: 44,
         height: 44,
         borderRadius: "50%",
         background: "#2f315a",
-        border: "1px solid rgba(255,255,255,0.15)",
-        color: "#ffffff",
+        border: "2px solid rgba(201,168,76,0.5)",
+        color: "#c9a84c",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
@@ -39,13 +34,14 @@ export default function BackToTop() {
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0) scale(1)" : "translateY(12px) scale(0.85)",
         pointerEvents: visible ? "auto" : "none",
-        transition: "opacity 0.3s, transform 0.3s",
+        transition: "opacity 0.3s, transform 0.3s, background 0.2s",
       }}
       onMouseOver={e => e.currentTarget.style.background = "#3d4075"}
       onMouseOut={e => e.currentTarget.style.background = "#2f315a"}
     >
+      {/* Chevron up */}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="18 15 12 9 6 15"/>
       </svg>
     </button>

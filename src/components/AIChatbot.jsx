@@ -16,10 +16,10 @@ import { useState, useRef, useEffect } from "react";
  * ══════════════════════════════════════════════════════════════ */
 
 /* ── CONFIG — set your Cloudflare Worker URL here ── */
-const WORKER_URL = "https://your-worker.your-subdomain.workers.dev";
+const WORKER_URL = "https://ksl-omni.chiaminjeng.workers.dev";
 /* ── SYSTEM PROMPT — customise the AI's persona ── */
 const SYSTEM_PROMPT = `You are a helpful assistant for KSL Business Solutions Sdn. Bhd., 
-specialising in the Sales2DO plugin for AutoCount Accounting. 
+specialising in AutoCount Accounting plugins, especially the Sales2DO plugin. 
 Answer questions about installing, configuring, and using the Sales2DO plugin. 
 Keep answers concise and practical. If asked about unrelated topics, politely 
 redirect to Sales2DO or KSL Business Solutions services.`;
@@ -86,9 +86,9 @@ const ImageIcon = () => (
 );
 const BotIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="11" width="18" height="11" rx="2"/>
-    <path d="M12 11V3m-4 4l4-4 4 4"/>
-    <circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/>
+    <rect x="2" y="3" width="20" height="14" rx="2"/>
+    <line x1="8" y1="21" x2="16" y2="21"/>
+    <line x1="12" y1="17" x2="12" y2="21"/>
   </svg>
 );
 const CloseIcon = () => (
@@ -332,7 +332,7 @@ export default function AIChatbot() {
       {open && (
         <div style={{
           position: "fixed",
-          bottom: 84,
+          bottom: 88,
           right: 28,
           zIndex: 600,
           width: "min(380px, calc(100vw - 32px))",
@@ -364,7 +364,7 @@ export default function AIChatbot() {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>
-                Sales2DO Assistant
+                AutoCount Plugin Assistant
               </div>
               <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
@@ -505,7 +505,7 @@ export default function AIChatbot() {
       <button
         onClick={() => setOpen(o => !o)}
         aria-label={open ? "Close AI assistant" : "Open AI assistant"}
-        title="Sales2DO AI Assistant"
+        title="AutoCount Plugin Assistant"
         style={{
           position: "fixed",
           bottom: 28,
