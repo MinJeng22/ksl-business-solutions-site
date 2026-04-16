@@ -86,9 +86,9 @@ const ImageIcon = () => (
 );
 const BotIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="3" width="20" height="14" rx="2" />
-    <line x1="8" y1="21" x2="16" y2="21" />
-    <line x1="12" y1="17" x2="12" y2="21" />
+    <rect x="2" y="3" width="20" height="13" rx="2" />
+    <path d="M8 21h8M12 17v4" />
+    <path d="M9 9h1M14 9h1M9 12c0 0 1.5 2 3 2s3-2 3-2" />
   </svg>
 );
 const CloseIcon = () => (
@@ -174,7 +174,7 @@ export default function AIChatbot() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      text: "Hi! I'm the Sales2DO assistant powered by Gemini AI. Ask me anything about the plugin — installation, usage, settings, or licensing. You can also send a screenshot for help! 😊",
+      text: "Hello! I'm the exclusive assistant for the Sales2DO plugin by KSL Business Solutions. Ask me anything about installation, features, pricing, or licensing. 😊",
     },
   ]);
   const [input, setInput] = useState("");
@@ -254,11 +254,13 @@ export default function AIChatbot() {
         body: JSON.stringify({
           systemPrompt: SYSTEM_PROMPT,
           messages: [
-            ...messages.filter(m => m.text || m.imagePreview).map(m => ({
-              role: m.role,
-              text: m.text,
-              gsPath: null,
-            })),
+            ...messages
+              .filter(m => (m.text || m.imagePreview) && !m.streaming && !m.error)
+              .map(m => ({
+                role: m.role,
+                text: m.text || "",
+                gsPath: null,
+              })),
             { role: "user", text, gsPath },
           ],
         }),
@@ -332,7 +334,7 @@ export default function AIChatbot() {
       {open && (
         <div style={{
           position: "fixed",
-          bottom: 88,
+          bottom: 92,
           right: 28,
           zIndex: 600,
           width: "min(380px, calc(100vw - 32px))",
