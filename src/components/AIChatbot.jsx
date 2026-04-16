@@ -16,7 +16,7 @@ import { useState, useRef, useEffect } from "react";
  * ══════════════════════════════════════════════════════════════ */
 
 /* ── CONFIG — set your Cloudflare Worker URL here ── */
-const WORKER_URL = "https://ksl-omni.chiaminjeng.workers.dev/chat";
+const WORKER_URL = "https://ksl-omni.chiaminjeng.workers.dev";
 /* ── SYSTEM PROMPT — customise the AI's persona ── */
 const SYSTEM_PROMPT = `You are a helpful assistant for KSL Business Solutions Sdn. Bhd., 
 specialising in AutoCount Accounting plugins, especially the Sales2DO plugin. 
