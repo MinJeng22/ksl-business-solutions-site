@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer";
 import { WA_LINK } from "../../constants/contact.js";
+import AIChatbot from "../../components/AIChatbot.jsx";
 
 /* ══════════════════════════════════════════════════════════════
  * SALES2DO PLUGIN — CASE STUDY PAGE
@@ -472,6 +473,7 @@ export default function Sales2DOPage({ onContact }) {
       </div>
 
       <Footer />
+      <AIChatbot />
     </div>
   );
 }

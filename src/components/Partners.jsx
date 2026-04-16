@@ -1,20 +1,5 @@
-/**
- * Partners.jsx
- * ─────────────────────────────────────────────────────────────
- * TO REPLACE A PARTNER LOGO:
- *   1. Drop your PNG/SVG into  src/assets/logos/partners/
- *   2. Rename the file to match the slot name:
- *        partner1.png  partner2.png  ...  partner6.png
- *   That's it — the image appears automatically.
- *
- * TO UPDATE THE DISPLAY NAME shown in the placeholder:
- *   Edit the "name" field in the PARTNERS array below.
- * ─────────────────────────────────────────────────────────────
- */
-
 import { PARTNER_LOGOS } from "../assets/assets.js";
 
-/* Update "name" to whatever label you want shown while no logo is uploaded */
 const PARTNERS = [
   { key: "partner1", name: "Partner 1" },
   { key: "partner2", name: "Partner 2" },
@@ -26,7 +11,6 @@ const PARTNERS = [
 
 function PartnerSlot({ partner }) {
   const src = PARTNER_LOGOS[partner.key];
-  const hasReal = src && src !== "";
 
   return (
     <div
@@ -52,7 +36,7 @@ function PartnerSlot({ partner }) {
         e.currentTarget.style.borderColor = "rgba(47,49,90,0.18)";
       }}
     >
-      {hasReal ? (
+      {src ? (
         <img
           src={src}
           alt={partner.name}

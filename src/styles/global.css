@@ -61,9 +61,23 @@ body {
   .video-grid    { grid-template-columns: 1fr !important; }
   .case-2col     { grid-template-columns: 1fr !important; }
 
-  /* Hero mobile: stack everything in a single centred column,
-     hide the flex-grow spacer so items bunch together */
-  .hero-spacer  { display: none !important; }
+  /* Hero mobile: hide spacer, centre everything */
+  .hero-spacer     { display: none !important; }
+
+  /* Logo + badge group: centre on mobile */
+  .hero-logo-group {
+    align-self: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    margin-bottom: 3rem !important;
+  }
+  .hero-badge {
+    align-self: center !important;
+    margin-top: 0.75rem !important;
+  }
+
+  /* Text block: centre on mobile */
   .hero-content {
     max-width: 100% !important;
     align-items: center !important;

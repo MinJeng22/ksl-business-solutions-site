@@ -15,6 +15,7 @@ import Footer        from "./components/Footer";
 import AutoCountAccountingPage from "./pages/products/AutoCountAccounting";
 import Sales2DOPage from "./pages/cases/Sales2DO";
 
+import BackToTop from "./components/BackToTop";
 import "./styles/global.css";
 
 function Home({ onContact }) {
@@ -48,6 +49,7 @@ export default function App() {
         </Routes>
 
         <ContactModal open={modalOpen} onClose={() => setModalOpen(false)} />
+        <BackToTop />
       </div>
     </BrowserRouter>
   );
