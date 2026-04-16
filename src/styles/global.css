@@ -59,18 +59,19 @@ body {
   .cases-grid    { grid-template-columns: 1fr !important; }
   .stats-grid    { grid-template-columns: repeat(2, 1fr) !important; }
   .video-grid    { grid-template-columns: 1fr !important; }
+  .case-2col     { grid-template-columns: 1fr !important; }
 
-  /* Hero — left-align kept, buttons stay in a row */
+  /* Hero mobile: stack everything in a single centred column,
+     hide the flex-grow spacer so items bunch together */
+  .hero-spacer  { display: none !important; }
   .hero-content {
     max-width: 100% !important;
-    align-items: flex-start !important;
-    text-align: left !important;
+    align-items: center !important;
+    text-align: center !important;
   }
 
-  /* Buttons: row, allow them to shrink slightly if needed */
-  .hero-btns {
-    flex-wrap: nowrap !important;
-  }
+  /* Buttons: side-by-side, shrink to fit */
+  .hero-btns { flex-wrap: nowrap !important; }
   .hero-btns > * {
     flex: 1 1 0;
     min-width: 0;

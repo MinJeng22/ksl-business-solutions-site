@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { CASE_IMAGES } from "../assets/assets.js";
 
 /* 4 case studies — first 2 use real images (replaceable via assets.js),
@@ -62,6 +63,7 @@ const ICONS = [
 ];
 
 export default function CaseStudies({ onContact }) {
+  const navigate = useNavigate();
   return (
     <section style={{ background: "#2f315a", padding: "6rem 0" }}>
     <div className="content-wrap">
@@ -100,11 +102,16 @@ export default function CaseStudies({ onContact }) {
           return (
             <div
               key={c.key}
+              onClick={c.key === "plugin" ? () => navigate("/cases/sales2do") : undefined}
               style={{
                 borderRadius: 16, overflow: "hidden",
                 background: "rgba(255,255,255,0.05)",
                 border: "1px solid rgba(255,255,255,0.1)",
+                cursor: c.key === "plugin" ? "pointer" : "default",
+                transition: "border-color 0.2s",
               }}
+              onMouseEnter={c.key === "plugin" ? e => e.currentTarget.style.borderColor = "rgba(201,168,76,0.5)" : undefined}
+              onMouseLeave={c.key === "plugin" ? e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)" : undefined}
             >
               {/* image / placeholder */}
               <div style={{

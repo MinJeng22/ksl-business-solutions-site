@@ -125,7 +125,7 @@ function ServiceCard({ service, onContactClick }) {
         display: "flex", flexDirection: "column",
       }}
     >
-      {/* Top row: icon + "Contact Us" link */}
+      {/* Top row: icon + "Enquire Now" link */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
         {/* Icon box */}
         <div style={{
@@ -137,7 +137,7 @@ function ServiceCard({ service, onContactClick }) {
           {service.icon}
         </div>
 
-        {/* Contact Us button */}
+        {/* Enquire Now button */}
         <button
           onClick={() => onContactClick(service)}
           style={{
@@ -160,7 +160,7 @@ function ServiceCard({ service, onContactClick }) {
             e.currentTarget.style.color = "#2f315a";
           }}
         >
-          Contact Us
+          Enquire Now
         </button>
       </div>
 

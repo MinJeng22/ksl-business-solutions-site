@@ -19,8 +19,6 @@ export default function Hero({ onContact }) {
       style={{
         position: "relative",
         minHeight: "100vh",
-        /* Full-height flex column so logo sits top-left,
-           text block sits bottom-left, with breathing room between */
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
@@ -30,26 +28,35 @@ export default function Hero({ onContact }) {
     >
       <ParticleBackground paused={paused} />
 
+      {/*
+       * DESKTOP layout (>640px):
+       *   content-wrap is a tall flex column.
+       *   Logo sits at the top.
+       *   Badge sits directly below the logo (no spacer between them).
+       *   A flex-grow spacer then pushes the remaining text block to
+       *   the bottom of the viewport.
+       *
+       * MOBILE layout (<640px):
+       *   .hero-desktop-split overrides via CSS so everything
+       *   stacks naturally in a single column, centred.
+       */}
       <div
         className="content-wrap"
         style={{
           position: "relative", zIndex: 2,
           width: "100%",
-          /* Take full section height so we can push text to bottom */
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          /* Logo top, text block pushed to lower area */
-          justifyContent: "space-between",
-          paddingTop: "clamp(100px, 14vh, 160px)",
-          paddingBottom: "clamp(60px, 10vh, 100px)",
+          paddingTop: "clamp(90px, 12vh, 140px)",
+          paddingBottom: "clamp(56px, 9vh, 90px)",
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0)" : "translateY(28px)",
           transition: "opacity 1.1s ease, transform 1.1s ease",
         }}
       >
-        {/* ── Logo — top of the column ── */}
-        <div style={{ marginBottom: "auto" }}>
+        {/* ── Logo ── */}
+        <div style={{ marginBottom: "1.1rem" }}>
           <a href="/" onClick={() => window.scrollTo(0, 0)} style={{ display: "inline-block" }}>
             <img
               src={LOGO_HERO}
@@ -64,30 +71,32 @@ export default function Hero({ onContact }) {
           </a>
         </div>
 
-        {/* ── Text block — bottom-left, with gap from logo ── */}
+        {/* ── Badge — directly below logo ── */}
+        <div style={{
+          display: "inline-flex", alignItems: "center",
+          background: "rgba(201,168,76,0.15)",
+          border: "1px solid rgba(201,168,76,0.4)",
+          color: "#e8c97a",
+          fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.13em",
+          padding: "0.35rem 1.1rem", borderRadius: 50,
+          textTransform: "uppercase",
+          alignSelf: "flex-start",
+        }}>
+          Pahang's No. 1 AutoCount Authorized Dealer
+        </div>
+
+        {/* ── Spacer — pushes text block to bottom on desktop ── */}
+        <div className="hero-spacer" style={{ flex: 1, minHeight: "3rem" }} />
+
+        {/* ── Text + buttons block — bottom-left on desktop ── */}
         <div
           className="hero-content"
           style={{
             display: "flex", flexDirection: "column",
             alignItems: "flex-start", textAlign: "left",
             maxWidth: 560,
-            /* Space between logo and text */
-            paddingTop: "clamp(2rem, 6vh, 4rem)",
           }}
         >
-          {/* Badge */}
-          <div style={{
-            display: "inline-flex", alignItems: "center",
-            background: "rgba(201,168,76,0.15)",
-            border: "1px solid rgba(201,168,76,0.4)",
-            color: "#e8c97a",
-            fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.13em",
-            padding: "0.35rem 1.1rem", borderRadius: 50, marginBottom: "1.2rem",
-            textTransform: "uppercase",
-          }}>
-            Pahang's No. 1 AutoCount Authorized Dealer
-          </div>
-
           <h1 style={{
             fontSize: "clamp(2.4rem, 5.5vw, 4.4rem)",
             fontWeight: 700, color: "#ffffff",
@@ -116,7 +125,7 @@ export default function Hero({ onContact }) {
             and training — all under one roof.
           </p>
 
-          {/* Buttons — always side-by-side (no wrap) */}
+          {/* Buttons — always side-by-side */}
           <div className="hero-btns" style={{ display: "flex", gap: "0.85rem", flexWrap: "nowrap" }}>
             <button
               onClick={onContact}
@@ -125,8 +134,7 @@ export default function Hero({ onContact }) {
                 padding: "0.75rem 1.75rem", borderRadius: 50,
                 fontSize: "0.88rem", fontWeight: 700,
                 border: "none", cursor: "pointer", fontFamily: "inherit",
-                whiteSpace: "nowrap",
-                transition: "opacity 0.2s",
+                whiteSpace: "nowrap", transition: "opacity 0.2s",
               }}
               onMouseOver={e => e.currentTarget.style.opacity = "0.85"}
               onMouseOut={e => e.currentTarget.style.opacity = "1"}

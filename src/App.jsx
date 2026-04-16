@@ -13,6 +13,7 @@ import Careers       from "./components/Careers";
 import Footer        from "./components/Footer";
 
 import AutoCountAccountingPage from "./pages/products/AutoCountAccounting";
+import Sales2DOPage from "./pages/cases/Sales2DO";
 
 import "./styles/global.css";
 
@@ -43,6 +44,7 @@ export default function App() {
         <Routes>
           <Route path="/"                              element={<Home onContact={openContact} />} />
           <Route path="/products/autocount-accounting" element={<AutoCountAccountingPage onContact={openContact} />} />
+          <Route path="/cases/sales2do"                   element={<Sales2DOPage onContact={openContact} />} />
         </Routes>
 
         <ContactModal open={modalOpen} onClose={() => setModalOpen(false)} />
