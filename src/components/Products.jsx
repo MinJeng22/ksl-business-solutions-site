@@ -71,9 +71,7 @@ export default function Products({ onContact }) {
                   borderRadius: 16, overflow: "hidden",
                   border: `1px solid ${isHov ? "rgba(47,49,90,0.3)" : "rgba(47,49,90,0.11)"}`,
                   background: "#ffffff",
-                  transform: isHov ? "translateY(-5px)" : "translateY(0)",
-                  boxShadow: isHov ? "0 14px 36px rgba(47,49,90,0.11)" : "none",
-                  transition: "transform 0.26s, box-shadow 0.26s, border-color 0.26s",
+                  transition: "border-color 0.26s",
                   cursor: clickable ? "pointer" : "default",
                 }}
               >
@@ -114,14 +112,6 @@ export default function Products({ onContact }) {
           })}
         </div>
 
-        <button
-          onClick={onContact}
-          style={{ marginTop: "2.5rem", background: "transparent", color: "#2f315a", border: "1.5px solid #2f315a", padding: "0.72rem 1.9rem", borderRadius: 50, fontSize: "0.85rem", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "background 0.2s, color 0.2s" }}
-          onMouseOver={e => { e.currentTarget.style.background = "#2f315a"; e.currentTarget.style.color = "#ffffff"; }}
-          onMouseOut={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#2f315a"; }}
-        >
-          Contact Us About Software
-        </button>
       </div>
     </section>
   );
