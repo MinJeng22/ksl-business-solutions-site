@@ -48,14 +48,17 @@ export default function Hero({ onContact }) {
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          paddingTop: "clamp(90px, 12vh, 140px)",
+          paddingTop: "clamp(76px, 10vh, 110px)",
           paddingBottom: "clamp(56px, 9vh, 90px)",
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0)" : "translateY(28px)",
           transition: "opacity 1.1s ease, transform 1.1s ease",
         }}
       >
-        {/* ── Logo ── */}
+        {/* ── Logo + badge group ── */}
+        <div className="hero-logo-group">
+
+        {/* Logo */}
         <div style={{ marginBottom: "1.1rem" }}>
           <a href="/" onClick={() => window.scrollTo(0, 0)} style={{ display: "inline-block" }}>
             <img
@@ -72,7 +75,7 @@ export default function Hero({ onContact }) {
         </div>
 
         {/* ── Badge — directly below logo ── */}
-        <div style={{
+        <div className="hero-badge" style={{
           display: "inline-flex", alignItems: "center",
           background: "rgba(201,168,76,0.15)",
           border: "1px solid rgba(201,168,76,0.4)",
@@ -85,8 +88,10 @@ export default function Hero({ onContact }) {
           Pahang's No. 1 AutoCount Authorized Dealer
         </div>
 
+        </div>{/* end hero-logo-group */}
+
         {/* ── Spacer — pushes text block to bottom on desktop ── */}
-        <div className="hero-spacer" style={{ flex: 1, minHeight: "3rem" }} />
+        <div className="hero-spacer" style={{ flex: 1, minHeight: "1.5rem", maxHeight: "6vh" }} />
 
         {/* ── Text + buttons block — bottom-left on desktop ── */}
         <div

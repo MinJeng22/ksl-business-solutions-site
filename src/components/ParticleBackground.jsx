@@ -198,6 +198,9 @@ export default function ParticleBackground({ paused }) {
       s.frameId = requestAnimationFrame(draw);
     }
 
+    /* Track mouse via window so the overlay content-wrap div
+       doesn't block events from reaching the canvas.
+       We translate page coords → canvas-relative coords. */
     function onMouseMove(e) {
       const rect = canvas.getBoundingClientRect();
       s.mx = e.clientX - rect.left;
@@ -207,7 +210,9 @@ export default function ParticleBackground({ paused }) {
 
     initCanvas(canvas.offsetWidth, canvas.offsetHeight);
     window.addEventListener("resize", onResize);
-    canvas.addEventListener("mousemove", onMouseMove);
+    /* Use window-level listener so the overlaid content div
+       does not swallow mouse events before they reach the canvas */
+    window.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("mouseleave", onMouseLeave);
     s.frameId = requestAnimationFrame(draw);
 
@@ -215,7 +220,7 @@ export default function ParticleBackground({ paused }) {
       cancelAnimationFrame(s.frameId);
       clearTimeout(s.resizeTimer);
       window.removeEventListener("resize", onResize);
-      canvas.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mouseleave", onMouseLeave);
     };
   }, []);
