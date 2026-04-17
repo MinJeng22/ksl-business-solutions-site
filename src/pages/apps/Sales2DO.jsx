@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer";
 import { WA_LINK } from "../../constants/contact.js";
 import AIChatbot from "../../components/AIChatbot.jsx";
-import acPluginIcon from "../../assets/images/apps/sales2do/ac-plugin-icon.png";
+import acPluginIcon from "../../assets/images/apps/ac-plugin-icon.png";
 
 /* ══════════════════════════════════════════════════════════════
  * SALES2DO PLUGIN — PAGE
