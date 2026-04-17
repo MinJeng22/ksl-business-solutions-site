@@ -52,18 +52,18 @@ import imgLicenseOnline from "../../assets/images/cases/sales2do/license-online.
 import imgLicenseOffline from "../../assets/images/cases/sales2do/license-offline.png";
 
 const IMAGE_SLOTS = {
-  workflowDiagram: null,   // imgWorkflow
-  step2: null,   // imgStep2
-  step3: null,   // imgStep3
+  workflowDiagram: imgWorkflow,   // imgWorkflow
+  step2: imgStep2,   // imgStep2
+  step3: imgStep3,   // imgStep3
   step4: null,   // imgStep4
-  step6: null,   // imgStep6
+  step6: imgStep6,   // imgStep6
   copy1: null,   // imgCopy1
   copy2: null,   // imgCopy2
   copy3: null,   // imgCopy3
   outstanding: null,   // imgOutstanding
-  settings: null,   // imgSettings
-  licenseOnline: null,   // imgLicenseOnline
-  licenseOffline: null,   // imgLicenseOffline
+  settings: imgSettings,   // imgSettings
+  licenseOnline: imgLicenseOnline,   // imgLicenseOnline
+  licenseOffline: imgLicenseOffline,   // imgLicenseOffline
 };
 
 /* ── Shared styles ── */
