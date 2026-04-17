@@ -39,7 +39,7 @@ import AIChatbot from "../../components/AIChatbot.jsx";
 
 /* ── Import your screenshots here once files are ready ── */
 // import imgWorkflow      from "../../assets/images/cases/sales2do/workflow.png";
-// import imgStep2         from "../../assets/images/cases/sales2do/step2.png";
+import imgStep2 from "../../assets/images/cases/sales2do/step2.png";
 // import imgStep3         from "../../assets/images/cases/sales2do/step3.png";
 // import imgStep4         from "../../assets/images/cases/sales2do/step4.png";
 // import imgStep6         from "../../assets/images/cases/sales2do/step6.png";
@@ -48,22 +48,22 @@ import AIChatbot from "../../components/AIChatbot.jsx";
 // import imgCopy3         from "../../assets/images/cases/sales2do/copy3.png";
 // import imgOutstanding   from "../../assets/images/cases/sales2do/outstanding.png";
 // import imgSettings      from "../../assets/images/cases/sales2do/settings.png";
-// import imgLicenseOnline  from "../../assets/images/cases/sales2do/license-online.png";
-// import imgLicenseOffline from "../../assets/images/cases/sales2do/license-offline.png";
+import imgLicenseOnline from "../../assets/images/cases/sales2do/license-online.png";
+import imgLicenseOffline from "../../assets/images/cases/sales2do/license-offline.png";
 
 const IMAGE_SLOTS = {
   workflowDiagram: null,   // imgWorkflow
-  step2:           null,   // imgStep2
-  step3:           null,   // imgStep3
-  step4:           null,   // imgStep4
-  step6:           null,   // imgStep6
-  copy1:           null,   // imgCopy1
-  copy2:           null,   // imgCopy2
-  copy3:           null,   // imgCopy3
-  outstanding:     null,   // imgOutstanding
-  settings:        null,   // imgSettings
-  licenseOnline:   null,   // imgLicenseOnline
-  licenseOffline:  null,   // imgLicenseOffline
+  step2: imgStep2,
+  step3: null,   // imgStep3
+  step4: null,   // imgStep4
+  step6: null,   // imgStep6
+  copy1: null,   // imgCopy1
+  copy2: null,   // imgCopy2
+  copy3: null,   // imgCopy3
+  outstanding: null,   // imgOutstanding
+  settings: null,   // imgSettings
+  licenseOnline: imgLicenseOnline,
+  licenseOffline: imgLicenseOffline,
 };
 
 /* ── Shared styles ── */
@@ -99,11 +99,11 @@ function ImgSlot({ src, alt, caption, maxWidth = 860 }) {
         {src
           ? <img src={src} alt={alt || ""} style={{ width: "100%", display: "block" }} />
           : <div style={{ padding: "1.75rem", textAlign: "center" }}>
-              <div style={{ fontSize: "1.6rem", opacity: 0.25, marginBottom: "0.4rem" }}>🖼️</div>
-              <div style={{ fontSize: "0.72rem", color: "#a8abcc", fontWeight: 500 }}>
-                {alt || "Screenshot placeholder"}
-              </div>
+            <div style={{ fontSize: "1.6rem", opacity: 0.25, marginBottom: "0.4rem" }}>🖼️</div>
+            <div style={{ fontSize: "0.72rem", color: "#a8abcc", fontWeight: 500 }}>
+              {alt || "Screenshot placeholder"}
             </div>
+          </div>
         }
       </div>
       {caption && (
@@ -207,9 +207,9 @@ export default function Sales2DOPage({ onContact }) {
                   onMouseOut={e => e.currentTarget.style.opacity = "1"}
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                   Download Now
                 </a>
@@ -236,7 +236,7 @@ export default function Sales2DOPage({ onContact }) {
           <div style={{ borderRadius: 16, overflow: "hidden", boxShadow: "0 16px 48px rgba(47,49,90,0.12)", border: "1px solid rgba(47,49,90,0.08)" }}>
             <div style={{ paddingBottom: "56.25%", position: "relative", background: "#0f1128" }}>
               <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.35)", gap: "0.75rem" }}>
-                <svg width="56" height="56" viewBox="0 0 24 24" fill="rgba(255,255,255,0.2)"><polygon points="5,3 19,12 5,21"/></svg>
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="rgba(255,255,255,0.2)"><polygon points="5,3 19,12 5,21" /></svg>
                 <div style={{ fontSize: "0.82rem", fontWeight: 500 }}>Demo video coming soon</div>
               </div>
               {/* Uncomment and replace YOUR_VIDEO_ID when ready:
@@ -492,7 +492,7 @@ export default function Sales2DOPage({ onContact }) {
                   padding: "0.45rem 1.3rem", borderRadius: 50, border: "none",
                   cursor: "pointer", fontFamily: "inherit",
                   background: licenseTab === key ? "#2f315a" : "transparent",
-                  color:      licenseTab === key ? "#ffffff" : "#6b6f91",
+                  color: licenseTab === key ? "#ffffff" : "#6b6f91",
                   transition: "background 0.2s, color 0.2s",
                 }}
               >{label}</button>
