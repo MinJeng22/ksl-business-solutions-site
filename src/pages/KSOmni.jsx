@@ -66,6 +66,18 @@ const QRIcon = () => (
   </svg>
 );
 
+/* ── Parse **bold** markdown into <strong> elements ── */
+function renderText(text) {
+  if (!text) return null;
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
 /* ── Message bubble ── */
 function Message({ msg }) {
   const isUser = msg.role === "user";
@@ -89,14 +101,7 @@ function Message({ msg }) {
             fontSize: "0.88rem", lineHeight: 1.65,
             whiteSpace: "pre-wrap", wordBreak: "break-word",
           }}>
-            {msg.text}
-          </div>
-        )}
-        {(!msg.text && msg.streaming) && (
-          <div style={{ display: "flex", gap: 4, padding: "0.65rem 0.95rem", background: "#f0f0f6", borderRadius: "16px 16px 16px 4px", alignItems: "center" }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: "#a8abcc", animation: `dotPulse 1.2s ease-in-out ${i * 0.2}s infinite` }} />
-            ))}
+            {renderText(msg.text)}
           </div>
         )}
         {msg.error && (
@@ -131,30 +136,35 @@ export default function KSLOmniPage({ onContact }) {
   const [loading, setLoading] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
-  const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const abortRef = useRef(null);
 
   const chatScrollRef = useRef(null);
-  useEffect(() => {
-    /* Only auto-scroll when a new message is added (not on streaming updates) */
+
+  /* Scroll chat container to bottom — never touches the page scroll */
+  function scrollChatToBottom() {
     const el = chatScrollRef.current;
-    if (!el) return;
-    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    /* Auto-scroll only if user is already near bottom (within 120px) */
-    if (distFromBottom < 120) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  /* Scroll only when a new message appears (not on every streaming update) */
+  const prevMsgLen = useRef(0);
+  useEffect(() => {
+    if (messages.length !== prevMsgLen.current) {
+      prevMsgLen.current = messages.length;
+      scrollChatToBottom();
     }
-  }, [messages.length]); /* Only trigger on new messages, not streaming text updates */
+  }, [messages.length]);
+
+  /* Focus input on mount and after AI finishes */
   useEffect(() => { setTimeout(() => inputRef.current?.focus(), 200); }, []);
-  /* Re-focus input after AI finishes responding */
   useEffect(() => {
     if (!loading) setTimeout(() => inputRef.current?.focus(), 50);
   }, [loading]);
 
   function clearChat() {
     abortRef.current?.abort();
-    setMessages([{ role: "assistant", text: "Chat cleared. How can I help you? 😊" }]);
+    setMessages([{ role: "assistant", text: "Chat cleared. How can I help you today? 😊" }]);
     setInput("");
   }
 
@@ -232,7 +242,7 @@ export default function KSLOmniPage({ onContact }) {
   if (isMobile) {
     return (
       <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", flexDirection: "column", background: "#ffffff" }}>
-        <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}} @keyframes dotPulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}`}</style>
+        <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
         {/* Mobile header */}
         <div style={{
@@ -263,7 +273,6 @@ export default function KSLOmniPage({ onContact }) {
         {/* Messages */}
         <div ref={chatScrollRef} style={{ flex: 1, overflowY: "auto", padding: "1rem", display: "flex", flexDirection: "column" }}>
           {messages.map((msg, i) => <Message key={i} msg={msg} />)}
-          <div ref={bottomRef} />
         </div>
 
         {/* Input row */}
@@ -310,7 +319,7 @@ export default function KSLOmniPage({ onContact }) {
             }
           </button>
         </div>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes dotPulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}`}</style>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         {showQR && <QRModal onClose={() => setShowQR(false)} />}
       </div>
     );
@@ -321,7 +330,7 @@ export default function KSLOmniPage({ onContact }) {
    * ══════════════════════════════════════════════════════════ */
   return (
     <div style={{ background: "#f5f5f8", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}} @keyframes dotPulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}} @keyframes spin{to{transform:rotate(360deg)}} @keyframes dotPulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}`}</style>
+      <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}} @keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       <Nav onContact={onContact} />
 
@@ -376,7 +385,6 @@ export default function KSLOmniPage({ onContact }) {
             {/* Messages */}
             <div ref={chatScrollRef} style={{ flex: 1, overflowY: "auto", padding: "1.5rem 1.75rem", display: "flex", flexDirection: "column" }}>
               {messages.map((msg, i) => <Message key={i} msg={msg} />)}
-              <div ref={bottomRef} />
             </div>
 
             {/* Input row */}

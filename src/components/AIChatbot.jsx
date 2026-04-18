@@ -36,6 +36,18 @@ const CloseIcon = () => (
   </svg>
 );
 
+/* ── Parse **bold** markdown into <strong> elements ── */
+function renderText(text) {
+  if (!text) return null;
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
 /* ── Message bubble ── */
 function Message({ msg }) {
   const isUser = msg.role === "user";
@@ -70,8 +82,7 @@ function Message({ msg }) {
             fontSize: "0.86rem", lineHeight: 1.65,
             whiteSpace: "pre-wrap", wordBreak: "break-word",
           }}>
-            {msg.text}
-
+            {renderText(msg.text)}
           </div>
         )}
 
