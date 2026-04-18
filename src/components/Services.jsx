@@ -1,14 +1,9 @@
 import { useState } from "react";
 import { SERVICE_CONTACTS } from "../constants/contact.js";
-import ServiceContactModal from "./ServiceContactModal.jsx";
 
 /* ══════════════════════════════════════════════════════════════
  * SERVICES DATA
- * ──────────────────────────────────────────────────────────────
- * key      → matches SERVICE_CONTACTS key in contact.js
- * title    → card heading (with strikethrough style to match mockup)
- * desc     → card body text
- * icon     → SVG element (shown in icon box top-left and in modal)
+ * key → matches SERVICE_CONTACTS key in contact.js
  * ══════════════════════════════════════════════════════════════ */
 const SERVICES = [
   {
@@ -82,96 +77,223 @@ const SERVICES = [
   },
 ];
 
-/* ── Individual service card ── */
-function ServiceCard({ service, onContactClick }) {
-  const [hov, setHov] = useState(false);
+/* ── Flip card ── */
+function ServiceCard({ service }) {
+  const [flipped, setFlipped] = useState(false);
+  const contact = SERVICE_CONTACTS[service.key] || {};
+  const waLink = `https://wa.me/${contact.whatsapp || "60179052323"}?text=${encodeURIComponent(
+    `Hi, I would like to enquire about your ${service.title} service. Thank you.`
+  )}`;
 
   return (
     <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
       style={{
-        background: "#f5f5f8",
-        borderRadius: 16,
-        padding: "1.6rem",
-        border: `1px solid ${hov ? "rgba(47,49,90,0.2)" : "rgba(47,49,90,0.07)"}`,
-        boxShadow: hov ? "0 8px 28px rgba(47,49,90,0.09)" : "none",
-        transform: hov ? "translateY(-2px)" : "translateY(0)",
-        transition: "border-color 0.22s, box-shadow 0.22s, transform 0.22s",
-        display: "flex", flexDirection: "column",
+        perspective: "1000px",
+        height: 260,
       }}
     >
-      {/* Top row: icon + "Enquire Now" link */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-        {/* Icon box */}
+      <div style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        transformStyle: "preserve-3d",
+        transition: "transform 0.55s cubic-bezier(0.4,0.2,0.2,1)",
+        transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+      }}>
+
+        {/* ── FRONT — Service info ── */}
         <div style={{
-          width: 44, height: 44, borderRadius: 11,
-          background: "#2f315a",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: "#ffffff", flexShrink: 0,
+          position: "absolute", inset: 0,
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          borderRadius: 18,
+          background: "#f5f5f8",
+          border: "1px solid rgba(47,49,90,0.09)",
+          padding: "1.4rem",
+          display: "flex", flexDirection: "column",
         }}>
-          {service.icon}
+          {/* Top row: icon + button */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 11,
+              background: "#2f315a",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "#ffffff", flexShrink: 0,
+            }}>
+              {service.icon}
+            </div>
+            <button
+              onClick={() => setFlipped(true)}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "0.35rem",
+                background: "transparent",
+                border: "1px solid rgba(47,49,90,0.18)",
+                borderRadius: 50,
+                padding: "0.35rem 0.9rem",
+                fontSize: "0.75rem", fontWeight: 600,
+                color: "#2f315a",
+                cursor: "pointer", fontFamily: "inherit",
+                transition: "background 0.18s, color 0.18s, border-color 0.18s",
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.background = "#2f315a";
+                e.currentTarget.style.color = "#ffffff";
+                e.currentTarget.style.borderColor = "#2f315a";
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "#2f315a";
+                e.currentTarget.style.borderColor = "rgba(47,49,90,0.18)";
+              }}
+            >
+              Enquire Now
+            </button>
+          </div>
+
+          <h3 style={{ fontSize: "0.97rem", fontWeight: 700, color: "#2f315a", marginBottom: "0.55rem", lineHeight: 1.3 }}>
+            {service.title}
+          </h3>
+          <p style={{ fontSize: "0.85rem", color: "#6b6f91", lineHeight: 1.72, flex: 1 }}>
+            {service.desc}
+          </p>
         </div>
 
-        {/* Enquire Now button */}
-        <button
-          onClick={() => onContactClick(service)}
-          style={{
-            display: "inline-flex", alignItems: "center", gap: "0.35rem",
-            background: "transparent",
-            border: "1px solid rgba(47,49,90,0.18)",
-            borderRadius: 50,
-            padding: "0.35rem 0.9rem",
-            fontSize: "0.75rem", fontWeight: 600,
-            color: "#2f315a",
-            cursor: "pointer", fontFamily: "inherit",
-            transition: "background 0.18s, border-color 0.18s",
-          }}
-          onMouseOver={e => {
-            e.currentTarget.style.background = "#2f315a";
-            e.currentTarget.style.color = "#ffffff";
-          }}
-          onMouseOut={e => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "#2f315a";
-          }}
-        >
-          Enquire Now
-        </button>
+        {/* ── BACK — Business card ── */}
+        <div style={{
+          position: "absolute", inset: 0,
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          transform: "rotateY(180deg)",
+          borderRadius: 18,
+          background: "#2f315a",
+          padding: "1.4rem",
+          display: "flex", flexDirection: "column",
+          justifyContent: "space-between",
+          overflow: "hidden",
+        }}>
+          {/* Decorative gold arc */}
+          <div style={{
+            position: "absolute", top: -40, right: -40,
+            width: 140, height: 140, borderRadius: "50%",
+            border: "28px solid rgba(201,168,76,0.15)",
+            pointerEvents: "none",
+          }} />
+          <div style={{
+            position: "absolute", bottom: -60, left: -30,
+            width: 160, height: 160, borderRadius: "50%",
+            border: "24px solid rgba(201,168,76,0.08)",
+            pointerEvents: "none",
+          }} />
+
+          {/* Back button */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{
+              fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em",
+              textTransform: "uppercase", color: "rgba(201,168,76,0.85)",
+            }}>
+              {contact.label || service.title}
+            </span>
+            <button
+              onClick={() => setFlipped(false)}
+              style={{
+                background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 50, padding: "0.25rem 0.7rem",
+                fontSize: "0.7rem", fontWeight: 600, color: "rgba(255,255,255,0.75)",
+                cursor: "pointer", fontFamily: "inherit",
+                transition: "background 0.2s",
+              }}
+              onMouseOver={e => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+              onMouseOut={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+            >
+              ← Back
+            </button>
+          </div>
+
+          {/* Contact details */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: "0.65rem", margin: "0.75rem 0" }}>
+            {/* Phone */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+              <div style={{ width: 28, height: 28, borderRadius: 7, background: "rgba(201,168,76,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l1-1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </div>
+              <span style={{ fontSize: "0.82rem", color: "#ffffff", fontWeight: 500 }}>{contact.phone || "017-905 2323"}</span>
+            </div>
+
+            {/* Email */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+              <div style={{ width: 28, height: 28, borderRadius: 7, background: "rgba(201,168,76,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+              </div>
+              <span style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.85)", fontWeight: 400, wordBreak: "break-all" }}>{contact.email || "support@ksleow.com.my"}</span>
+            </div>
+
+            {/* Address */}
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem" }}>
+              <div style={{ width: 28, height: 28, borderRadius: 7, background: "rgba(201,168,76,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
+              <span style={{ fontSize: "0.73rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.55 }}>
+                Taman Zabidin, Mentakab, Pahang
+              </span>
+            </div>
+          </div>
+
+          {/* CTA buttons */}
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <a
+              href={waLink}
+              target="_blank" rel="noreferrer"
+              style={{
+                flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
+                background: "#c9a84c", color: "#1e2040",
+                borderRadius: 50, padding: "0.5rem 0",
+                fontSize: "0.75rem", fontWeight: 700,
+                textDecoration: "none", transition: "opacity 0.2s",
+              }}
+              onMouseOver={e => e.currentTarget.style.opacity = "0.85"}
+              onMouseOut={e => e.currentTarget.style.opacity = "1"}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" /></svg>
+              WhatsApp
+            </a>
+            <a
+              href={`mailto:${contact.email || "support@ksleow.com.my"}`}
+              style={{
+                flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
+                background: "rgba(255,255,255,0.1)", color: "#ffffff",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 50, padding: "0.5rem 0",
+                fontSize: "0.75rem", fontWeight: 600,
+                textDecoration: "none", transition: "background 0.2s",
+              }}
+              onMouseOver={e => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+              onMouseOut={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+            >
+              Email
+            </a>
+          </div>
+        </div>
+
       </div>
-
-      {/* Title */}
-      <h3 style={{
-        fontSize: "0.97rem", fontWeight: 700,
-        color: "#2f315a",
-        marginBottom: "0.55rem",
-        lineHeight: 1.3,
-      }}>
-        {service.title}
-      </h3>
-
-      {/* Description */}
-      <p style={{
-        fontSize: "0.85rem", color: "#6b6f91",
-        lineHeight: 1.72, flex: 1,
-      }}>
-        {service.desc}
-      </p>
     </div>
   );
 }
 
 /* ── Section ── */
 export default function Services() {
-  const [activeService, setActiveService] = useState(null);
-
-  function handleContactClick(service) {
-    const contact = SERVICE_CONTACTS[service.key] || null;
-    setActiveService({ ...service, contact });
-  }
-
   return (
     <>
+      <style>{`
+        @keyframes cardFlip { from { opacity: 0; } to { opacity: 1; } }
+      `}</style>
       <section id="services" style={{ background: "#ffffff", padding: "6rem 0" }}>
         <div className="content-wrap">
           <div style={{
@@ -190,7 +312,7 @@ export default function Services() {
             fontSize: "1rem", color: "#6b6f91", lineHeight: 1.75,
             maxWidth: 540, marginBottom: "3rem",
           }}>
-            Accounting, secretarial, taxation, management, auditing, hardware
+            Taxation, accounting, secretarial, management, auditing, hardware
             wholesale, technical services, and training — all under one roof
             since 1981.
           </p>
@@ -200,23 +322,11 @@ export default function Services() {
             style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.1rem" }}
           >
             {SERVICES.map(s => (
-              <ServiceCard
-                key={s.key}
-                service={s}
-                onContactClick={handleContactClick}
-              />
+              <ServiceCard key={s.key} service={s} />
             ))}
           </div>
         </div>
       </section>
-
-      {/* Per-service contact modal */}
-      {activeService && (
-        <ServiceContactModal
-          service={activeService}
-          onClose={() => setActiveService(null)}
-        />
-      )}
     </>
   );
 }
