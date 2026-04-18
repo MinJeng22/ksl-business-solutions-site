@@ -15,7 +15,7 @@ import BackToTop from "./components/BackToTop";
 
 import AutoCountAccountingPage from "./pages/products/AutoCountAccounting";
 import Sales2DOPage from "./pages/apps/Sales2DO";
-import KSLOmniPage from "./pages/KSLOmni";
+import KSOmniPage from "./pages/KSOmni";
 
 import "./styles/global.css";
 
@@ -47,7 +47,7 @@ export default function App() {
           <Route path="/" element={<Home onContact={openContact} />} />
           <Route path="/products/autocount-accounting" element={<AutoCountAccountingPage onContact={openContact} />} />
           <Route path="/apps/sales2do" element={<Sales2DOPage onContact={openContact} />} />
-          <Route path="/omni" element={<KSLOmniPage onContact={openContact} />} />
+          <Route path="/omni" element={<KSOmniPage onContact={openContact} />} />
         </Routes>
 
         <ContactModal open={modalOpen} onClose={() => setModalOpen(false)} />

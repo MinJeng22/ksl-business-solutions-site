@@ -80,7 +80,7 @@ function Message({ msg }) {
         </div>
       )}
       <div style={{ maxWidth: "78%", display: "flex", flexDirection: "column", gap: "0.25rem", alignItems: isUser ? "flex-end" : "flex-start" }}>
-        {(msg.text || msg.streaming) && (
+        {(msg.text) && (
           <div style={{
             background: isUser ? "#2f315a" : "#f0f0f6",
             color: isUser ? "#ffffff" : "#2f315a",
@@ -90,6 +90,13 @@ function Message({ msg }) {
             whiteSpace: "pre-wrap", wordBreak: "break-word",
           }}>
             {msg.text}
+          </div>
+        )}
+        {(!msg.text && msg.streaming) && (
+          <div style={{ display: "flex", gap: 4, padding: "0.65rem 0.95rem", background: "#f0f0f6", borderRadius: "16px 16px 16px 4px", alignItems: "center" }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: "#a8abcc", animation: `dotPulse 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+            ))}
           </div>
         )}
         {msg.error && (
@@ -104,9 +111,9 @@ function Message({ msg }) {
 
 /* ── Use mobile detection ── */
 function useIsMobile() {
-  const [mobile, setMobile] = useState(window.innerWidth < 1024);
+  const [mobile, setMobile] = useState(window.innerWidth < 1200);
   useEffect(() => {
-    const fn = () => setMobile(window.innerWidth < 1024);
+    const fn = () => setMobile(window.innerWidth < 1200);
     window.addEventListener("resize", fn);
     return () => window.removeEventListener("resize", fn);
   }, []);
@@ -118,7 +125,7 @@ export default function KSLOmniPage({ onContact }) {
   const isMobile = useIsMobile();
   const [messages, setMessages] = useState([{
     role: "assistant",
-    text: "Hello! I'm the KSL Omni assistant, powered by Gemini AI. I specialise in answering questions about the Sales2DO plugin — installation, features, pricing, and licensing. How can I help you today? 😊",
+    text: "Hello! I'm the KSL Group AutoCount Plugin AI Assistant. I specialise in answering questions about the Sales2DO plugin — installation, features, pricing, and licensing. How can I help you today? 😊",
   }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -128,7 +135,6 @@ export default function KSLOmniPage({ onContact }) {
   const inputRef = useRef(null);
   const abortRef = useRef(null);
 
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, []);
   const chatScrollRef = useRef(null);
   useEffect(() => {
     /* Only auto-scroll when a new message is added (not on streaming updates) */
@@ -213,7 +219,7 @@ export default function KSLOmniPage({ onContact }) {
         next[next.length - 1] = { role: "assistant", text: "", error: "Connection error. Please try again.", streaming: false };
         return next;
       });
-    } finally { setLoading(false); }
+    } finally { setLoading(false); setTimeout(() => inputRef.current?.focus(), 50); }
   }
 
   function handleKey(e) {
@@ -226,7 +232,7 @@ export default function KSLOmniPage({ onContact }) {
   if (isMobile) {
     return (
       <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", flexDirection: "column", background: "#ffffff" }}>
-        <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}`}</style>
+        <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}} @keyframes dotPulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}`}</style>
 
         {/* Mobile header */}
         <div style={{
@@ -242,7 +248,7 @@ export default function KSLOmniPage({ onContact }) {
             <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KS Omni</div>
             <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 4 }}>
               <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
-              Powered by Gemini AI
+              KSL Group AutoCount Plugin AI Assistant
             </div>
           </div>
           <button onClick={clearChat} title="Clear chat" style={{
@@ -304,7 +310,7 @@ export default function KSLOmniPage({ onContact }) {
             }
           </button>
         </div>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes dotPulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}`}</style>
         {showQR && <QRModal onClose={() => setShowQR(false)} />}
       </div>
     );
@@ -315,7 +321,7 @@ export default function KSLOmniPage({ onContact }) {
    * ══════════════════════════════════════════════════════════ */
   return (
     <div style={{ background: "#f5f5f8", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}} @keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}} @keyframes dotPulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}} @keyframes spin{to{transform:rotate(360deg)}} @keyframes dotPulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}`}</style>
 
       <Nav onContact={onContact} />
 
@@ -330,7 +336,7 @@ export default function KSLOmniPage({ onContact }) {
               <div>
                 <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c9a84c", marginBottom: "0.25rem" }}>Powered by Gemini AI</div>
                 <h1 style={{ fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KS Omni</h1>
-                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", marginTop: "0.2rem" }}>K.S. Leow Group AI Assistant</p>
+                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", marginTop: "0.2rem" }}>KSL Group AutoCount Plugin AI Assistant</p>
               </div>
             </div>
             <div style={{ display: "flex", gap: "0.65rem" }}>

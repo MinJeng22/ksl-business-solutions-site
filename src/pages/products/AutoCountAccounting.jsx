@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer";
 import { WA_LINK } from "../../constants/contact.js";
@@ -853,6 +853,18 @@ const TAG = {
   fix: { bg: "rgba(201,168,76,0.12)", color: "#8a6a10", label: "Fix" },
 };
 
+/* ── Copy release notes to clipboard (WhatsApp format) ── */
+function copyToClipboard(r, type) {
+  const lines = type === "features" ? r.features : r.fixes;
+  const header = type === "features"
+    ? `*AutoCount ${r.version} — New Features*`
+    : `*AutoCount ${r.version} — Bug Fixes*`;
+  const text = header + "\n" + lines.map(l => `• ${l}`).join("\n");
+  navigator.clipboard.writeText(text).then(() => {
+    /* brief visual feedback handled by button state */
+  }).catch(() => { });
+}
+
 function ReleaseBadge({ type }) {
   const t = TAG[type];
   return (
@@ -864,6 +876,41 @@ function ReleaseBadge({ type }) {
     }}>
       {t.label}
     </span>
+  );
+}
+
+/* ── Copy button ── */
+function CopyBtn({ onClick, gold }) {
+  const [copied, setCopied] = React.useState(false);
+  function handle() {
+    onClick();
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+  return (
+    <button
+      onClick={handle}
+      title="Copy for WhatsApp"
+      style={{
+        display: "inline-flex", alignItems: "center", gap: "0.3rem",
+        background: copied ? (gold ? "rgba(201,168,76,0.2)" : "rgba(47,49,90,0.12)") : "transparent",
+        border: `1px solid ${gold ? "rgba(201,168,76,0.35)" : "rgba(47,49,90,0.18)"}`,
+        borderRadius: 50, padding: "0.2rem 0.6rem",
+        fontSize: "0.62rem", fontWeight: 600,
+        color: copied ? (gold ? "#8a6a10" : "#2f315a") : "#a8abcc",
+        cursor: "pointer", fontFamily: "inherit",
+        transition: "all 0.2s",
+      }}
+    >
+      {copied ? "✓ Copied" : (
+        <>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          Copy
+        </>
+      )}
+    </button>
   );
 }
 
@@ -918,11 +965,14 @@ function ReleaseCard({ r, expanded, onToggle }) {
       {/* Expanded body */}
       {expanded && (
         <div style={{ padding: "0 1.4rem 1.4rem", borderTop: "0.5px solid rgba(47,49,90,0.08)" }}>
-          <div className="release-detail-grid" style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginTop: "1.1rem" }}>
+          <div className="release-detail-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", marginTop: "1.1rem" }}>
             {/* New Features */}
             <div>
-              <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#2f315a", marginBottom: "0.65rem" }}>
-                New Features
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.65rem" }}>
+                <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#2f315a" }}>
+                  New Features
+                </div>
+                <CopyBtn onClick={() => copyToClipboard(r, "features")} />
               </div>
               {r.features.map((f, i) => (
                 <div key={i} style={{ display: "flex", gap: "0.55rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
@@ -933,8 +983,11 @@ function ReleaseCard({ r, expanded, onToggle }) {
             </div>
             {/* Bug Fixes */}
             <div>
-              <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#8a6a10", marginBottom: "0.65rem" }}>
-                Bug Fixes
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.65rem" }}>
+                <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#8a6a10" }}>
+                  Bug Fixes
+                </div>
+                <CopyBtn onClick={() => copyToClipboard(r, "fixes")} gold />
               </div>
               {r.fixes.map((f, i) => (
                 <div key={i} style={{ display: "flex", gap: "0.55rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
