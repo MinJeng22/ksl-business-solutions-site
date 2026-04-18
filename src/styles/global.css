@@ -18,8 +18,8 @@
   --muted: #6b6f91;
 
   /* Desktop: generous but not excessive */
-  --px: clamp(16px, 2.5vw, 36px);
-  --content-max-w: 1280px;
+  --px: clamp(12px, 1.5vw, 24px);
+  --content-max-w: 1360px;
 }
 
 html {
@@ -115,7 +115,7 @@ body {
     grid-template-columns: repeat(2, 1fr) !important;
   }
 
-  /* release-detail-grid is flex column — no override needed */
+  /* release-detail-grid stays 1fr 1fr — side by side even on mobile */
 
   /* Hero mobile: hide spacer, centre everything */
   .hero-spacer {

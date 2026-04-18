@@ -860,9 +860,16 @@ function copyToClipboard(r, type) {
     ? `*AutoCount ${r.version} — New Features*`
     : `*AutoCount ${r.version} — Bug Fixes*`;
   const text = header + "\n" + lines.map(l => `• ${l}`).join("\n");
-  navigator.clipboard.writeText(text).then(() => {
-    /* brief visual feedback handled by button state */
-  }).catch(() => { });
+  navigator.clipboard.writeText(text).catch(() => { });
+}
+
+/* ── Copy compare-mode results (array of {ver, rev, text}) ── */
+function copyCompare(items, fromVer, toVer, type) {
+  const header = type === "features"
+    ? `*AutoCount New Features (${fromVer} → ${toVer})*`
+    : `*AutoCount Bug Fixes (${fromVer} → ${toVer})*`;
+  const text = header + "\n" + items.map(f => `[${f.rev}] • ${f.text}`).join("\n");
+  navigator.clipboard.writeText(text).catch(() => { });
 }
 
 function ReleaseBadge({ type }) {
@@ -1265,7 +1272,10 @@ export default function AutoCountAccountingPage({ onContact }) {
                 {/* Changelog between the two versions */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
                   <div style={{ background: "#ffffff", borderRadius: 14, padding: "1.4rem", border: "1px solid rgba(47,49,90,0.1)" }}>
-                    <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#2f315a", marginBottom: "1rem" }}>New Features ({allFeatures.length})</div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+                      <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#2f315a" }}>New Features ({allFeatures.length})</div>
+                      {allFeatures.length > 0 && <CopyBtn onClick={() => copyCompare(allFeatures, compareA, compareB, "features")} />}
+                    </div>
                     {allFeatures.length === 0 && <div style={{ fontSize: "0.82rem", color: "#a8abcc" }}>No new features in this range.</div>}
                     {allFeatures.map((f, i) => (
                       <div key={i} style={{ display: "flex", gap: "0.55rem", alignItems: "flex-start", marginBottom: "0.65rem" }}>
@@ -1275,7 +1285,10 @@ export default function AutoCountAccountingPage({ onContact }) {
                     ))}
                   </div>
                   <div style={{ background: "#ffffff", borderRadius: 14, padding: "1.4rem", border: "1px solid rgba(47,49,90,0.1)" }}>
-                    <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#8a6a10", marginBottom: "1rem" }}>Bug Fixes ({allFixes.length})</div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+                      <div style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#8a6a10" }}>Bug Fixes ({allFixes.length})</div>
+                      {allFixes.length > 0 && <CopyBtn onClick={() => copyCompare(allFixes, compareA, compareB, "fixes")} gold />}
+                    </div>
                     {allFixes.length === 0 && <div style={{ fontSize: "0.82rem", color: "#a8abcc" }}>No bug fixes in this range.</div>}
                     {allFixes.map((f, i) => (
                       <div key={i} style={{ display: "flex", gap: "0.55rem", alignItems: "flex-start", marginBottom: "0.65rem" }}>
