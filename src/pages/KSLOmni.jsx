@@ -104,9 +104,9 @@ function Message({ msg }) {
 
 /* ── Use mobile detection ── */
 function useIsMobile() {
-  const [mobile, setMobile] = useState(window.innerWidth < 640);
+  const [mobile, setMobile] = useState(window.innerWidth < 1024);
   useEffect(() => {
-    const fn = () => setMobile(window.innerWidth < 640);
+    const fn = () => setMobile(window.innerWidth < 1024);
     window.addEventListener("resize", fn);
     return () => window.removeEventListener("resize", fn);
   }, []);
@@ -129,8 +129,22 @@ export default function KSLOmniPage({ onContact }) {
   const abortRef = useRef(null);
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, []);
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  const chatScrollRef = useRef(null);
+  useEffect(() => {
+    /* Only auto-scroll when a new message is added (not on streaming updates) */
+    const el = chatScrollRef.current;
+    if (!el) return;
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    /* Auto-scroll only if user is already near bottom (within 120px) */
+    if (distFromBottom < 120) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages.length]); /* Only trigger on new messages, not streaming text updates */
   useEffect(() => { setTimeout(() => inputRef.current?.focus(), 200); }, []);
+  /* Re-focus input after AI finishes responding */
+  useEffect(() => {
+    if (!loading) setTimeout(() => inputRef.current?.focus(), 50);
+  }, [loading]);
 
   function clearChat() {
     abortRef.current?.abort();
@@ -211,7 +225,7 @@ export default function KSLOmniPage({ onContact }) {
    * ══════════════════════════════════════════════════════════ */
   if (isMobile) {
     return (
-      <div style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", background: "#ffffff" }}>
+      <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", flexDirection: "column", background: "#ffffff" }}>
         <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
         {/* Mobile header */}
@@ -225,7 +239,7 @@ export default function KSLOmniPage({ onContact }) {
             <img src="/ksl-logo-circle.png" alt="KSL" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KSL Omni</div>
+            <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KS Omni</div>
             <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 4 }}>
               <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
               Powered by Gemini AI
@@ -241,7 +255,7 @@ export default function KSLOmniPage({ onContact }) {
         </div>
 
         {/* Messages */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "1rem", display: "flex", flexDirection: "column" }}>
+        <div ref={chatScrollRef} style={{ flex: 1, overflowY: "auto", padding: "1rem", display: "flex", flexDirection: "column" }}>
           {messages.map((msg, i) => <Message key={i} msg={msg} />)}
           <div ref={bottomRef} />
         </div>
@@ -311,12 +325,12 @@ export default function KSLOmniPage({ onContact }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1.5rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
               <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "2px solid rgba(201,168,76,0.5)" }}>
-                <img src="/ksl-logo-circle.png" alt="KSL Omni" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                <img src="/ksl-logo-circle.png" alt="KS Omni" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
               </div>
               <div>
                 <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c9a84c", marginBottom: "0.25rem" }}>Powered by Gemini AI</div>
-                <h1 style={{ fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KSL Omni</h1>
-                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", marginTop: "0.2rem" }}>AutoCount Plugin AI Assistant</p>
+                <h1 style={{ fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KS Omni</h1>
+                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", marginTop: "0.2rem" }}>K.S. Leow Group AI Assistant</p>
               </div>
             </div>
             <div style={{ display: "flex", gap: "0.65rem" }}>
@@ -354,7 +368,7 @@ export default function KSLOmniPage({ onContact }) {
             minHeight: "calc(100dvh - 340px)",
           }}>
             {/* Messages */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "1.5rem 1.75rem", display: "flex", flexDirection: "column" }}>
+            <div ref={chatScrollRef} style={{ flex: 1, overflowY: "auto", padding: "1.5rem 1.75rem", display: "flex", flexDirection: "column" }}>
               {messages.map((msg, i) => <Message key={i} msg={msg} />)}
               <div ref={bottomRef} />
             </div>
