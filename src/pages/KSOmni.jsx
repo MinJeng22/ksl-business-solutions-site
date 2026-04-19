@@ -5,9 +5,10 @@ import Footer from "../components/Footer";
 const WORKER_URL = "https://ksl-omni.chiaminjeng.workers.dev";
 const PAGE_URL = "https://ksl-business-solutions-site.vercel.app/omni";
 
-/* ── QR Code modal ── */
-function QRModal({ onClose }) {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(PAGE_URL)}&bgcolor=ffffff&color=2f315a&margin=12`;
+/* ── QR Code modal — includes machineId in URL if present ── */
+function QRModal({ onClose, machineId }) {
+  const pageUrl = machineId ? `${PAGE_URL}?mid=${encodeURIComponent(machineId)}` : PAGE_URL;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pageUrl)}&bgcolor=ffffff&color=2f315a&margin=12`;
   return (
     <div onClick={onClose} style={{
       position: "fixed", inset: 0, zIndex: 9999,
@@ -25,13 +26,19 @@ function QRModal({ onClose }) {
         <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c9a84c", marginBottom: "0.4rem" }}>Scan to Continue</div>
         <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#2f315a", marginBottom: "0.4rem" }}>Open on Mobile</h3>
         <p style={{ fontSize: "0.78rem", color: "#6b6f91", lineHeight: 1.6, marginBottom: "1.25rem" }}>
-          Scan this QR code with your phone to open KSL Omni on your mobile device.
+          Scan this QR code with your phone to open KS Omni on your mobile device.
+          {machineId && " Your Machine ID will be carried over automatically."}
         </p>
         <div style={{ display: "inline-block", padding: "0.75rem", borderRadius: 16, border: "2px solid rgba(47,49,90,0.1)", background: "#f8f8fb", marginBottom: "1.25rem" }}>
           <img src={qrUrl} alt="QR code" width={200} height={200} style={{ display: "block", borderRadius: 8 }} />
         </div>
-        <div style={{ background: "#f0f0f6", borderRadius: 10, padding: "0.55rem 0.85rem", fontSize: "0.72rem", color: "#6b6f91", fontFamily: "monospace", wordBreak: "break-all", marginBottom: "1.25rem" }}>
-          {PAGE_URL}
+        {machineId && (
+          <div style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", borderRadius: 10, padding: "0.5rem 0.85rem", fontSize: "0.72rem", color: "#8a6a10", fontWeight: 600, marginBottom: "0.75rem" }}>
+            🔗 Machine ID: {machineId}
+          </div>
+        )}
+        <div style={{ background: "#f0f0f6", borderRadius: 10, padding: "0.55rem 0.85rem", fontSize: "0.68rem", color: "#6b6f91", fontFamily: "monospace", wordBreak: "break-all", marginBottom: "1.25rem" }}>
+          {pageUrl}
         </div>
         <button onClick={onClose} style={{
           width: "100%", padding: "0.7rem", background: "#2f315a", color: "#ffffff",
@@ -136,6 +143,14 @@ export default function KSLOmniPage({ onContact }) {
   const [loading, setLoading] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
+  /* ── Read Machine ID from URL query param (?mid=XXXX) ──
+   * AutoCount Plugin passes this when launching the page.
+   * Also preserved in QR code so mobile carries over the same ID. */
+  const [machineId] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("mid") || null;
+  });
+
   const inputRef = useRef(null);
   const abortRef = useRef(null);
 
@@ -188,6 +203,9 @@ export default function KSLOmniPage({ onContact }) {
               .map(m => ({ role: m.role, text: m.text })),
             { role: "user", text },
           ],
+          /* Pass Machine ID so Cloudflare Worker / Conversational Agent
+             can include it in system context for feedback tool calls */
+          machine_id: machineId || undefined,
         }),
         signal: abortRef.current.signal,
       });
@@ -258,7 +276,7 @@ export default function KSLOmniPage({ onContact }) {
             <div style={{ fontSize: "0.92rem", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KS Omni</div>
             <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 4 }}>
               <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
-              KSL Group AutoCount Plugin AI Assistant
+              {machineId ? `Machine ID: ${machineId}` : "KSL Group AutoCount Plugin AI Assistant"}
             </div>
           </div>
           <button onClick={clearChat} title="Clear chat" style={{
@@ -320,7 +338,7 @@ export default function KSLOmniPage({ onContact }) {
           </button>
         </div>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-        {showQR && <QRModal onClose={() => setShowQR(false)} />}
+        {showQR && <QRModal onClose={() => setShowQR(false)} machineId={machineId} />}
       </div>
     );
   }
@@ -346,6 +364,11 @@ export default function KSLOmniPage({ onContact }) {
                 <div style={{ fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c9a84c", marginBottom: "0.25rem" }}>Powered by Gemini AI</div>
                 <h1 style={{ fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KS Omni</h1>
                 <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", marginTop: "0.2rem" }}>KSL Group AutoCount Plugin AI Assistant</p>
+                {machineId && (
+                  <div style={{ marginTop: "0.35rem", display: "inline-flex", alignItems: "center", gap: "0.35rem", background: "rgba(201,168,76,0.15)", border: "1px solid rgba(201,168,76,0.35)", borderRadius: 50, padding: "0.2rem 0.7rem", fontSize: "0.68rem", color: "#c9a84c", fontWeight: 600 }}>
+                    🔗 Machine ID: {machineId}
+                  </div>
+                )}
               </div>
             </div>
             <div style={{ display: "flex", gap: "0.65rem" }}>
@@ -443,7 +466,7 @@ export default function KSLOmniPage({ onContact }) {
       </div>
 
       <Footer />
-      {showQR && <QRModal onClose={() => setShowQR(false)} />}
+      {showQR && <QRModal onClose={() => setShowQR(false)} machineId={machineId} />}
     </div>
   );
 }
