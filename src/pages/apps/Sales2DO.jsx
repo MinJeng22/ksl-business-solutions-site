@@ -23,23 +23,25 @@ import acPluginIcon from "../../assets/images/apps/ac-plugin-icon.png";
  * ══════════════════════════════════════════════════════════════ */
 
 // import imgWorkflow    from "../../assets/images/apps/sales2do/workflow.png";
-// import imgCopy1       from "../../assets/images/apps/sales2do/copy1.png";
-// import imgCopy2       from "../../assets/images/apps/sales2do/copy2.png";
-// import imgCopy3       from "../../assets/images/apps/sales2do/copy3.png";
-// import imgOutstanding from "../../assets/images/apps/sales2do/outstanding.png";
-// import imgSettings    from "../../assets/images/apps/sales2do/settings.png";
-// import imgLicenseOnline  from "../../assets/images/apps/sales2do/license-online.png";
-// import imgLicenseOffline from "../../assets/images/apps/sales2do/license-offline.png";
+import imgCopy1       from "../../assets/images/apps/sales2do/copy1.png";
+import imgCopy2       from "../../assets/images/apps/sales2do/copy2.png";
+import imgCopy3       from "../../assets/images/apps/sales2do/copy3.png";
+import imgOutstanding from "../../assets/images/apps/sales2do/outstanding.png";
+import imgSettings    from "../../assets/images/apps/sales2do/settings.png";
+import imgAIAssistant   from "../../assets/images/apps/sales2do/ai-assistant.png";
+import imgLicenseOnline  from "../../assets/images/apps/sales2do/license-online.png";
+import imgLicenseOffline from "../../assets/images/apps/sales2do/license-offline.png";
 
 const IMAGE_SLOTS = {
   workflowDiagram: null,
-  copy1: null,
-  copy2: null,
-  copy3: null,
-  outstanding: null,
-  settings: null,
-  licenseOnline: null,
-  licenseOffline: null,
+  copy1: imgCopy1,
+  copy2: imgCopy2,
+  copy3: imgCopy3,
+  outstanding: imgOutstanding,
+  settings: imgSettings,
+  aiAssistant: imgAIAssistant,
+  licenseOnline: imgLicenseOnline,
+  licenseOffline: imgLicenseOffline,
 };
 
 /* ── Shared styles ── */
@@ -346,6 +348,24 @@ export default function Sales2DOPage({ onContact }) {
             <Step n={1}>Check <strong>"Enable Smart Copy Control"</strong> in the settings.</Step>
             <Step n={2}>When copying a partially copied document, the system calculates the remaining balance and <strong>only loads the outstanding quantity</strong> into the new Delivery Order.</Step>
             <Step n={3}>If a document has already been fully copied, the system will prompt a warning asking if you still intend to proceed.</Step>
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI Assistant & Feedback ── */}
+      <div style={{ background: "#ffffff", ...S.section }}>
+        <div className="content-wrap">
+          <div style={S.label}>Support</div>
+          <h2 style={S.h2}>AI Assistant and Feedback</h2>
+          <p style={{ ...S.body, marginBottom: "1.5rem" }}>
+            If you are facing an issue or have a suggestion, the Sales2DO plugin comes with built-in AI and feedback support.
+          </p>
+
+          <ImgSlot src={IMAGE_SLOTS.aiAssistant} alt="AI Assistant & Feedback navigation" caption="Sales2DO → AI Assistant and Feedback" />
+
+          <div style={{ marginTop: "1.5rem" }}>
+            <Step n={1}>Navigate to <strong>Sales2DO &gt; AI Assistant and Feedback</strong> from the navigation bar.</Step>
+            <Step n={2}>This will launch a dedicated web portal where you can get instant technical assistance, troubleshoot errors, or send direct feedback to the KSL Business Solutions team.</Step>
           </div>
         </div>
       </div>

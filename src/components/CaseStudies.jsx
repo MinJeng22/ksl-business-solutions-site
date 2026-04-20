@@ -99,60 +99,52 @@ export default function CaseStudies({ onContact }) {
         {CASES.map((c, i) => {
           const imgSrc = CASE_IMAGES[c.key];
           const meta   = CARD_META[i];
+          /* Last 2 cards are empty placeholders */
+          const isEmpty = i >= 2;
           return (
             <div
               key={c.key}
-              onClick={c.key === "plugin" ? () => navigate("/apps/sales2do") : undefined}
+              onClick={!isEmpty && c.key === "plugin" ? () => navigate("/apps/sales2do") : undefined}
               style={{
                 borderRadius: 16, overflow: "hidden",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                cursor: c.key === "plugin" ? "pointer" : "default",
+                background: isEmpty ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${isEmpty ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.1)"}`,
+                cursor: !isEmpty && c.key === "plugin" ? "pointer" : "default",
                 transition: "border-color 0.2s",
+                minHeight: isEmpty ? 200 : "auto",
               }}
-              onMouseEnter={c.key === "plugin" ? e => e.currentTarget.style.borderColor = "rgba(201,168,76,0.5)" : undefined}
-              onMouseLeave={c.key === "plugin" ? e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)" : undefined}
+              onMouseEnter={!isEmpty && c.key === "plugin" ? e => e.currentTarget.style.borderColor = "rgba(201,168,76,0.5)" : undefined}
+              onMouseLeave={!isEmpty && c.key === "plugin" ? e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)" : undefined}
             >
-              {/* image / placeholder */}
-              <div style={{
-                position: "relative", paddingBottom: "48%",
-                background: meta.accent,
-              }}>
-                {imgSrc ? (
-                  <img
-                    src={imgSrc} alt={c.title}
-                    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                    onError={e => { e.currentTarget.style.display = "none"; }}
-                  />
-                ) : (
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: meta.iconColor, opacity: 0.5,
-                  }}>
-                    {ICONS[i]}
+              {!isEmpty && (
+                <>
+                  {/* image / placeholder */}
+                  <div style={{ position: "relative", paddingBottom: "48%", background: meta.accent }}>
+                    {imgSrc ? (
+                      <img src={imgSrc} alt={c.title}
+                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                        onError={e => { e.currentTarget.style.display = "none"; }}
+                      />
+                    ) : (
+                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: meta.iconColor, opacity: 0.5 }}>
+                        {ICONS[i]}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-
-              {/* body */}
-              <div style={{ padding: "1.4rem" }}>
-                <div style={{
-                  fontSize: "0.67rem", fontWeight: 600, letterSpacing: "0.1em",
-                  color: "#c9a84c", textTransform: "uppercase", marginBottom: "0.5rem",
-                }}>
-                  {c.tag}
-                </div>
-                <h3 style={{
-                  fontSize: "0.93rem", fontWeight: 600,
-                  color: "#ffffff", lineHeight: 1.45, marginBottom: "0.55rem",
-                }}>
-                  {c.title}
-                </h3>
-                <p style={{ fontSize: "0.81rem", color: "rgba(255,255,255,0.52)", lineHeight: 1.72 }}>
-                  {c.desc}
-                </p>
-              </div>
+                  {/* body */}
+                  <div style={{ padding: "1.4rem" }}>
+                    <div style={{ fontSize: "0.67rem", fontWeight: 600, letterSpacing: "0.1em", color: "#c9a84c", textTransform: "uppercase", marginBottom: "0.5rem" }}>
+                      {c.tag}
+                    </div>
+                    <h3 style={{ fontSize: "0.93rem", fontWeight: 600, color: "#ffffff", lineHeight: 1.45, marginBottom: "0.55rem" }}>
+                      {c.title}
+                    </h3>
+                    <p style={{ fontSize: "0.81rem", color: "rgba(255,255,255,0.52)", lineHeight: 1.72 }}>
+                      {c.desc}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           );
         })}
