@@ -45,8 +45,8 @@ const SERVICES = [
     dealer: {
       label: "Authorized Dealer",
       logos: [
-        { src: "/sunmi-logo.png", alt: "Sunmi", h: 50 },
-        { src: "/mdot-logo.png", alt: "Mdot", h: 50 },
+        { src: "/sunmi-logo.png", alt: "Sunmi", h: 40 },
+        { src: "/mdot-logo.png", alt: "Mdot", h: 40 },
       ],
     },
   },
