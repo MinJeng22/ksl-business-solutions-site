@@ -24,20 +24,20 @@ const SERVICES = [
     dealer: {
       label: "Authorized Dealer",
       logos: [
-        { src: "/sunmi-logo.png", alt: "Sunmi", h: 22 },
-        { src: "/mdot-logo.png",  alt: "Mdot",  h: 20 },
+        { src: "/sunmi-logo.png", alt: "Sunmi", h: 32 },
+        { src: "/mdot-logo.png",  alt: "Mdot",  h: 28 },
       ],
     },
   },
   {
     key: "accounting_pos",
-    title: "Accounting & POS System Support",
+    title: "Software Training & Support",
     desc: "Authorized AutoCount and FeedMe dealer for Pahang. Full installation, configuration, licensing, training, and ongoing support for AutoCount Accounting, POS, and FeedMe Smart POS.",
     dealer: {
       label: "Authorized Dealer",
       logos: [
-        { src: "/autocount-logo.png", alt: "AutoCount", h: 22 },
-        { src: "/feedme-logo.png",    alt: "FeedMe",    h: 22 },
+        { src: "/autocount-logo.png", alt: "AutoCount", h: 30 },
+        { src: "/feedme-logo.png",    alt: "FeedMe",    h: 30 },
       ],
     },
   },
@@ -58,7 +58,7 @@ function DealerBadge({ dealer }) {
           <div key={logo.alt} style={{ display: "flex", alignItems: "center" }}>
             <img
               src={logo.src} alt={logo.alt}
-              style={{ height: logo.h, maxWidth: 80, objectFit: "contain" }}
+              style={{ height: logo.h, maxWidth: 110, objectFit: "contain" }}
             />
             {i < dealer.logos.length - 1 && (
               <div style={{
