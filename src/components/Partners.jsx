@@ -1,16 +1,14 @@
 import { PARTNER_LOGOS } from "../assets/assets.js";
+import partnersContent from "../content/partners.json";
 
-const PARTNERS = [
-  { key: "partner1", name: "Partner 1" },
-  { key: "partner2", name: "Partner 2" },
-  { key: "partner3", name: "Partner 3" },
-  { key: "partner4", name: "Partner 4" },
-  { key: "partner5", name: "Partner 5" },
-  { key: "partner6", name: "Partner 6" },
-];
+const PARTNERS = (partnersContent.items || []).map((p, i) => ({
+  key:  `partner${i + 1}`,
+  name: p.name,
+  logo: p.logo || "",
+}));
 
 function PartnerSlot({ partner }) {
-  const src = PARTNER_LOGOS[partner.key];
+  const src = partner.logo || PARTNER_LOGOS[partner.key];
 
   return (
     <div
@@ -70,7 +68,7 @@ export default function Partners() {
           fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.12em",
           color: "#6b6f91", textTransform: "uppercase", marginBottom: "2rem",
         }}>
-          Our Partners
+          {partnersContent.eyebrow}
         </p>
         <div
           className="partners-grid"

@@ -1,68 +1,21 @@
 import { useState } from "react";
 import { SERVICE_CONTACTS } from "../constants/contact.js";
+import servicesContent from "../content/services.json";
 
-const SERVICES = [
-  {
-    key: "taxation",
-    title: "Taxation & Accounting",
-    desc: "Full-scope accounting and tax services — bookkeeping, financial statements, corporate and individual tax filing, SST compliance, e-Invoice readiness, and LHDN liaison.",
-    certified: {
-      label: "Certified By",
-      logos: [
-        { src: "/cert-taxation-1.png", alt: "Cert 1", h: 60 },
-        { src: "/cert-taxation-2.png", alt: "Cert 2", h: 60 },
-      ],
-    },
-  },
-  {
-    key: "secretarial",
-    title: "Secretarial & Management",
-    desc: "Company incorporation, SSM annual returns, board resolutions, corporate secretarial compliance, business process consulting, management reporting, and strategic advisory.",
-    certified: {
-      label: "Certified By",
-      logos: [
-        { src: "/cert-secretarial-1.png", alt: "Cert 1", h: 60 },
-        { src: "/cert-secretarial-2.png", alt: "Cert 2", h: 60 },
-      ],
-    },
-  },
-  {
-    key: "auditing",
-    title: "Auditing",
-    desc: "Independent financial audits and assurance services. Present accurate, credible financials to stakeholders, banks, and regulatory bodies with confidence.",
-    certified: {
-      label: "Certified By",
-      logos: [
-        { src: "/cert-auditing-1.png", alt: "Cert 1", h: 60 },
-        { src: "/cert-auditing-2.png", alt: "Cert 2", h: 60 },
-      ],
-    },
-  },
-  {
-    key: "hardware",
-    title: "Computer Hardware & Technical",
-    desc: "Computer hardware wholesale, IT infrastructure, networking solutions, and on-site technical support for SMEs across Pahang.",
-    dealer: {
-      label: "Authorized Dealer",
-      logos: [
-        { src: "/sunmi-logo.png", alt: "Sunmi", h: 64 },
-        { src: "/mdot-logo.png",  alt: "Mdot",  h: 56 },
-      ],
-    },
-  },
-  {
-    key: "accounting_pos",
-    title: "Software Training & Support",
-    desc: "Authorized AutoCount and FeedMe dealer for Pahang. Full installation, configuration, licensing, training, and ongoing support for AutoCount Accounting, POS, and FeedMe Smart POS.",
-    dealer: {
-      label: "Authorized Dealer",
-      logos: [
-        { src: "/autocount-logo.png", alt: "AutoCount", h: 60 },
-        { src: "/feedme-logo.png",    alt: "FeedMe",    h: 60 },
-      ],
-    },
-  },
-];
+/* Normalise CMS shape (badgeType + badgeLabel + logos) into the
+ * { dealer | certified } shape the existing render code expects. */
+const SERVICES = (servicesContent.items || []).map(s => {
+  const badge = s.badgeLabel && s.logos
+    ? { label: s.badgeLabel, logos: s.logos.map(l => ({ ...l, h: l.h || 60 })) }
+    : null;
+  return {
+    key: s.key,
+    title: s.title,
+    desc: s.desc,
+    ...(s.badgeType === "dealer"    && badge ? { dealer:    badge } : {}),
+    ...(s.badgeType === "certified" && badge ? { certified: badge } : {}),
+  };
+});
 
 /* ── Badge row — used for both Authorized Dealer and Certified By ── */
 function BadgeRow({ badge }) {
@@ -279,15 +232,13 @@ export default function Services() {
       <section id="services" style={{ background: "#ffffff", padding: "6rem 0" }}>
         <div className="content-wrap">
           <div style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c9a84c", marginBottom: "0.75rem" }}>
-            What we do
+            {servicesContent.eyebrow}
           </div>
           <h2 style={{ fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 700, color: "#2f315a", lineHeight: 1.2, marginBottom: "0.75rem" }}>
-            Our Service Offerings
+            {servicesContent.heading}
           </h2>
           <p style={{ fontSize: "1rem", color: "#6b6f91", lineHeight: 1.75, maxWidth: 540, marginBottom: "3rem" }}>
-            Taxation, accounting, secretarial, management, auditing, hardware
-            wholesale, technical services, and training — all under one roof
-            since 1981.
+            {servicesContent.intro}
           </p>
           <div className="services-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.1rem" }}>
             {SERVICES.map(s => (

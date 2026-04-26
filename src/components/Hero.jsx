@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ParticleBackground from "./ParticleBackground";
 import { LOGO_HERO } from "../assets/assets.js";
+import hero from "../content/hero.json";
 
 export default function Hero({ onContact }) {
   const [paused, setPaused]   = useState(false);
@@ -85,7 +86,7 @@ export default function Hero({ onContact }) {
           textTransform: "uppercase",
           alignSelf: "flex-start",
         }}>
-          Pahang's No. 1 AutoCount Authorized Dealer
+          {hero.badge}
         </div>
 
         </div>{/* end hero-logo-group */}
@@ -108,7 +109,7 @@ export default function Hero({ onContact }) {
             lineHeight: 1.08, letterSpacing: "-0.025em",
             marginBottom: "0.5rem",
           }}>
-            Hello.
+            {hero.headline}
           </h1>
 
           <p style={{
@@ -116,7 +117,7 @@ export default function Hero({ onContact }) {
             fontWeight: 400, color: "#e8c97a",
             fontStyle: "italic", marginBottom: "1.1rem",
           }}>
-            Your Vision, Our Solutions.
+            {hero.tagline}
           </p>
 
           <p style={{
@@ -124,10 +125,7 @@ export default function Hero({ onContact }) {
             color: "rgba(255,255,255,0.65)",
             lineHeight: 1.82, marginBottom: "2rem",
           }}>
-            K.S. Leow Group, established in 1981, provides a comprehensive suite
-            of services including accounting, secretarial, taxation, management,
-            and auditing, alongside computer hardware wholesale, technical services,
-            and training — all under one roof.
+            {hero.body}
           </p>
 
           {/* Buttons — always side-by-side */}
@@ -144,10 +142,10 @@ export default function Hero({ onContact }) {
               onMouseOver={e => e.currentTarget.style.opacity = "0.85"}
               onMouseOut={e => e.currentTarget.style.opacity = "1"}
             >
-              Get in touch
+              {hero.primaryButton}
             </button>
             <a
-              href="#services"
+              href={hero.secondaryButtonHref || "#services"}
               style={{
                 background: "transparent", color: "#ffffff",
                 border: "1.5px solid rgba(255,255,255,0.35)",
@@ -159,7 +157,7 @@ export default function Hero({ onContact }) {
               onMouseOver={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.82)"}
               onMouseOut={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.35)"}
             >
-              Our Services
+              {hero.secondaryButton}
             </a>
           </div>
         </div>

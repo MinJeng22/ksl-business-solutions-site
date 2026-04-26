@@ -1,34 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { CASE_IMAGES } from "../assets/assets.js";
+import caseStudiesContent from "../content/caseStudies.json";
 
-/* 4 case studies — first 2 use real images (replaceable via assets.js),
-   last 2 are fictional but plausible given KSL's service portfolio.      */
-const CASES = [
-  {
-    key: "networking",
-    tag: "IT Networking · Infrastructure",
-    title: "Mentakab Mall Network Architecture Design & Deployment",
-    desc: "Designed and deployed a scalable enterprise network for Mentakab Mall — covering structured cabling, VLAN segmentation, Wi-Fi 6 access points, and a centralised management dashboard.",
-  },
-  {
-    key: "plugin",
-    tag: "AutoCount · Plugin Development",
-    title: "Custom Sales2DO Plugin for AutoCount Accounting",
-    desc: "Built a bespoke Sales2DO module extending AutoCount's core — enabling automated order-to-delivery-order conversion, real-time stock updates, and approval workflows for a Pahang distributor.",
-  },
-  {
-    key: "erp",
-    tag: "ERP Integration · Manufacturing",
-    title: "AutoCount ERP Integration for a Temerloh Food Manufacturer",
-    desc: "Integrated AutoCount Accounting with a production planning module for a local food manufacturer, synchronising raw-material procurement, batch costing, and finished-goods inventory in real time.",
-  },
-  {
-    key: "warehouse",
-    tag: "IT Networking · Smart Warehouse",
-    title: "Smart Warehouse Networking & Barcode System for Kuantan Logistics Firm",
-    desc: "Deployed an industrial-grade wireless mesh network across a 20,000 sq ft warehouse, integrated with AutoCount's inventory module and handheld barcode scanners for real-time stock accuracy.",
-  },
-];
+const CASES = caseStudiesContent.items || [];
 
 /* accent colours and placeholder icons for each card */
 const CARD_META = [
@@ -73,17 +47,16 @@ export default function CaseStudies({ onContact }) {
           fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.12em",
           textTransform: "uppercase", color: "#c9a84c", marginBottom: "0.75rem",
         }}>
-          Success Stories
+          {caseStudiesContent.eyebrow}
         </div>
         <h2 style={{
           fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 700,
           color: "#2f315a", lineHeight: 1.2, marginBottom: "0.75rem",
         }}>
-          Case Studies
+          {caseStudiesContent.heading}
         </h2>
         <p style={{ fontSize: "1rem", color: "#6b6f91", lineHeight: 1.78, maxWidth: 540 }}>
-          Real projects, real results — see how we have helped Pahang businesses
-          modernise their operations with the right technology.
+          {caseStudiesContent.intro}
         </p>
       </div>
 
@@ -97,24 +70,25 @@ export default function CaseStudies({ onContact }) {
         }}
       >
         {CASES.map((c, i) => {
-          const imgSrc = CASE_IMAGES[c.key];
-          const meta   = CARD_META[i];
+          const imgSrc = c.image || CASE_IMAGES[c.key];
+          const meta   = CARD_META[i] || CARD_META[CARD_META.length - 1];
           /* Last 2 cards are empty placeholders */
           const isEmpty = i >= 2;
+          const clickable = !isEmpty && !!c.route;
           return (
             <div
-              key={c.key}
-              onClick={!isEmpty && c.key === "plugin" ? () => navigate("/apps/sales2do") : undefined}
+              key={c.key || i}
+              onClick={clickable ? () => navigate(c.route) : undefined}
               style={{
                 borderRadius: 16, overflow: "hidden",
                 background: isEmpty ? "rgba(47,49,90,0.02)" : "#ffffff",
                 border: `1px solid ${isEmpty ? "rgba(47,49,90,0.04)" : "rgba(47,49,90,0.1)"}`,
-                cursor: !isEmpty && c.key === "plugin" ? "pointer" : "default",
+                cursor: clickable ? "pointer" : "default",
                 transition: "border-color 0.2s",
                 minHeight: isEmpty ? 200 : "auto",
               }}
-              onMouseEnter={!isEmpty && c.key === "plugin" ? e => e.currentTarget.style.borderColor = "rgba(201,168,76,0.5)" : undefined}
-              onMouseLeave={!isEmpty && c.key === "plugin" ? e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)" : undefined}
+              onMouseEnter={clickable ? e => e.currentTarget.style.borderColor = "rgba(201,168,76,0.5)" : undefined}
+              onMouseLeave={clickable ? e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)" : undefined}
             >
               {!isEmpty && (
                 <>
@@ -127,7 +101,7 @@ export default function CaseStudies({ onContact }) {
                       />
                     ) : (
                       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: meta.iconColor, opacity: 0.5 }}>
-                        {ICONS[i]}
+                        {ICONS[i] || ICONS[ICONS.length - 1]}
                       </div>
                     )}
                   </div>
@@ -163,7 +137,7 @@ export default function CaseStudies({ onContact }) {
         onMouseOver={e => { e.currentTarget.style.borderColor = "#2f315a"; e.currentTarget.style.color = "#2f315a"; }}
         onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(47,49,90,0.28)"; e.currentTarget.style.color = "rgba(47,49,90,0.7)"; }}
       >
-        Discuss Your Project
+        {caseStudiesContent.ctaLabel || "Discuss Your Project"}
       </button>
     </div>
     </section>
