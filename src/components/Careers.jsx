@@ -1,4 +1,5 @@
 import { CONTACT } from "../constants/contact.js";
+import careers from "../content/careers.json";
 
 export default function Careers() {
   return (
@@ -20,17 +21,16 @@ export default function Careers() {
             fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.12em",
             textTransform: "uppercase", color: "#c9a84c", marginBottom: "0.75rem",
           }}>
-            Join Us
+            {careers.eyebrow}
           </div>
           <h2 style={{
             fontSize: "clamp(1.4rem, 2.5vw, 1.9rem)", fontWeight: 700,
             color: "#2f315a", marginBottom: "0.75rem", lineHeight: 1.35,
           }}>
-            "Alone we can do so little, together we can do so much."
+            {careers.heading}
           </h2>
           <p style={{ color: "#6b6f91", fontSize: "0.95rem", lineHeight: 1.75 }}>
-            We are always looking for dedicated individuals to grow with us.
-            Join Pahang's leading business solutions team and make a real impact.
+            {careers.body}
           </p>
         </div>
 
@@ -46,7 +46,7 @@ export default function Careers() {
           onMouseOver={e => e.currentTarget.style.background = "#3d4075"}
           onMouseOut={e => e.currentTarget.style.background = "#2f315a"}
         >
-          Join The Team
+          {careers.buttonLabel}
         </a>
       </div>
     </div>

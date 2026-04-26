@@ -1,0 +1,173 @@
+# ─────────────────────────────────────────────────────────────
+#  Decap CMS configuration — KSL Business Solutions
+# ─────────────────────────────────────────────────────────────
+#  Edits made in /admin commit JSON files in src/content/ to
+#  GitHub. Vercel detects the push and rebuilds the site, so
+#  changes appear live in ~30 seconds.
+# ─────────────────────────────────────────────────────────────
+
+backend:
+  name: github
+  repo: MinJeng22/ksl-business-solutions-site
+  branch: main
+  base_url: https://decap-oauth-proxy.kslbs.workers.dev
+  auth_endpoint: oauth                  # matches /oauth route on the Worker
+
+# Files uploaded via the CMS land in /public/uploads/ and are
+# referenced from content as /uploads/<filename>.
+media_folder: public/uploads
+public_folder: /uploads
+
+# Optional: turn on the editorial workflow for draft → review → publish.
+# publish_mode: editorial_workflow
+
+site_url: https://ksleow.com
+display_url: https://ksleow.com
+logo_url: /ksl-logo-circle.png
+
+collections:
+  # ── Single-file collection: one form per homepage section ──
+  - name: homepage
+    label: Homepage Sections
+    editor:
+      preview: false
+    files:
+      # ───────── Hero ─────────
+      - file: src/content/hero.json
+        name: hero
+        label: Hero (Top Banner)
+        fields:
+          - { name: badge,               label: Top badge text,          widget: string }
+          - { name: headline,            label: Headline (large white),  widget: string }
+          - { name: tagline,             label: Italic tagline (gold),   widget: string }
+          - { name: body,                label: Body paragraph,          widget: text }
+          - { name: primaryButton,       label: Primary button label,    widget: string }
+          - { name: secondaryButton,     label: Secondary button label,  widget: string }
+          - { name: secondaryButtonHref, label: Secondary button link,   widget: string, default: "#services" }
+
+      # ───────── Stats bar ─────────
+      - file: src/content/stats.json
+        name: stats
+        label: Stats Bar
+        fields:
+          - name: items
+            label: Statistics
+            widget: list
+            min: 1
+            fields:
+              - { name: num,   label: Number / Value, widget: string }
+              - { name: label, label: Caption,        widget: string }
+
+      # ───────── Services ─────────
+      - file: src/content/services.json
+        name: services
+        label: Services Section
+        fields:
+          - { name: eyebrow, label: Eyebrow (small gold text), widget: string }
+          - { name: heading, label: Section heading,           widget: string }
+          - { name: intro,   label: Intro paragraph,           widget: text }
+          - name: items
+            label: Service Cards
+            widget: list
+            min: 1
+            fields:
+              - { name: key,        label: Internal key (no spaces, links to contact info), widget: string }
+              - { name: title,      label: Card title,                   widget: string }
+              - { name: desc,       label: Card description,             widget: text }
+              - name: badgeType
+                label: Badge type
+                widget: select
+                options:
+                  - { label: "Authorized Dealer (gold)", value: dealer }
+                  - { label: "Certified By (grey)",      value: certified }
+                default: dealer
+              - { name: badgeLabel, label: Badge label text,             widget: string, default: "Authorized Dealer" }
+              - name: logos
+                label: Badge logos
+                widget: list
+                fields:
+                  - { name: src, label: Logo image, widget: image }
+                  - { name: alt, label: Alt text,   widget: string }
+                  - { name: h,   label: Height (px), widget: number, default: 60, value_type: int, min: 20, max: 120 }
+
+      # ───────── Products ─────────
+      - file: src/content/products.json
+        name: products
+        label: Products Section
+        fields:
+          - { name: eyebrow, label: Eyebrow,         widget: string }
+          - { name: heading, label: Section heading, widget: string }
+          - { name: intro,   label: Intro paragraph, widget: text }
+          - name: items
+            label: Product Cards
+            widget: list
+            min: 1
+            fields:
+              - { name: name,        label: Product name,           widget: string }
+              - { name: desc,        label: Description,            widget: text }
+              - { name: image,       label: Product image (optional), widget: image, required: false }
+              - { name: placeholder, label: Emoji placeholder (used when no image), widget: string, default: "📦" }
+              - { name: gradient,    label: Background gradient CSS, widget: string, default: "linear-gradient(135deg, #2f315a 0%, #4a4d85 100%)" }
+              - { name: route,       label: Internal link (optional, e.g. /products/autocount-accounting), widget: string, required: false }
+
+      # ───────── Case Studies ─────────
+      - file: src/content/caseStudies.json
+        name: caseStudies
+        label: Case Studies Section
+        fields:
+          - { name: eyebrow,  label: Eyebrow,         widget: string }
+          - { name: heading,  label: Section heading, widget: string }
+          - { name: intro,    label: Intro paragraph, widget: text }
+          - { name: ctaLabel, label: Bottom button label, widget: string, default: "Discuss Your Project" }
+          - name: items
+            label: Case Study Cards (first 2 visible, last 2 are placeholders)
+            widget: list
+            min: 4
+            max: 4
+            fields:
+              - { name: key,   label: Internal key, widget: string }
+              - { name: tag,   label: Tag line (small gold uppercase), widget: string }
+              - { name: title, label: Title,        widget: string }
+              - { name: desc,  label: Description,  widget: text }
+              - { name: image, label: Cover image (optional), widget: image, required: false }
+              - { name: route, label: Internal link (optional), widget: string, required: false }
+
+      # ───────── Partners ─────────
+      - file: src/content/partners.json
+        name: partners
+        label: Partners Section
+        fields:
+          - { name: eyebrow, label: Eyebrow text, widget: string }
+          - name: items
+            label: Partner Logos
+            widget: list
+            min: 1
+            fields:
+              - { name: name, label: Partner name (shown if no logo), widget: string }
+              - { name: logo, label: Logo image,                       widget: image, required: false }
+
+      # ───────── Careers ─────────
+      - file: src/content/careers.json
+        name: careers
+        label: Careers Section
+        fields:
+          - { name: eyebrow,     label: Eyebrow,        widget: string }
+          - { name: heading,     label: Heading / Quote, widget: string }
+          - { name: body,        label: Body paragraph,  widget: text }
+          - { name: buttonLabel, label: Button label,    widget: string }
+
+      # ───────── Footer ─────────
+      - file: src/content/footer.json
+        name: footer
+        label: Footer
+        fields:
+          - { name: tagline,         label: Brand tagline,      widget: text }
+          - { name: contactHeading,  label: Contact heading,    widget: string, default: "Contact Us" }
+          - { name: servicesHeading, label: Services heading,   widget: string, default: "Services" }
+          - { name: followHeading,   label: Follow Us heading,  widget: string, default: "Follow Us" }
+          - name: services
+            label: Services list
+            widget: list
+            field: { name: name, label: Service, widget: string }
+          - { name: copyrightLine,   label: Copyright line (year is added automatically), widget: string }
+          - { name: locationLine,    label: Location line,      widget: string }

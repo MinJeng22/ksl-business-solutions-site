@@ -1,24 +1,20 @@
-const STATS = [
-  { num: "500+", label: "Businesses Served" },
-  { num: "40+", label: "Years in Pahang" },
-  { num: "6", label: "Service Pillars" },
-  { num: "100%", label: "Authorized Dealer" },
-];
+import stats from "../content/stats.json";
 
 export default function Stats() {
+  const items = stats.items || [];
   return (
     <div style={{ background: "#ffffff", borderBottom: "0.5px solid rgba(47,49,90,0.1)" }}>
       <div
         className="content-wrap stats-grid"
-        style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)" }}
+        style={{ display: "grid", gridTemplateColumns: `repeat(${items.length || 4}, 1fr)` }}
       >
-        {STATS.map((s, i) => (
+        {items.map((s, i) => (
           <div
             key={i}
             style={{
               textAlign: "center",
               padding: "2.5rem 1rem",
-              borderRight: i < STATS.length - 1
+              borderRight: i < items.length - 1
                 ? "0.5px solid rgba(47,49,90,0.1)"
                 : "none",
             }}

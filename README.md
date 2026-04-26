@@ -30,9 +30,23 @@ ksl-site/
 ├── index.html                    ← HTML entry point
 ├── package.json
 ├── vite.config.js
+├── public/
+│   ├── admin/                    ← ⭐ Decap CMS admin panel (/admin)
+│   │   ├── index.html            ← loads Decap from CDN
+│   │   └── config.yml            ← collections / fields / GitHub backend
+│   └── uploads/                  ← ⭐ CMS-uploaded images (auto-managed)
 └── src/
     ├── main.jsx                  ← React root mount
     ├── App.jsx                   ← Main layout — assembles all sections
+    ├── content/                  ← ⭐ Editable JSON content (CMS-managed)
+    │   ├── hero.json
+    │   ├── stats.json
+    │   ├── services.json
+    │   ├── products.json
+    │   ├── caseStudies.json
+    │   ├── partners.json
+    │   ├── careers.json
+    │   └── footer.json
     ├── styles/
     │   └── global.css            ← CSS variables, resets, responsive breakpoints
     ├── constants/
@@ -66,7 +80,45 @@ ksl-site/
 
 ---
 
+## 🛠️ Admin Content Manager (`/admin`)
+
+The homepage is now driven by a **Decap CMS** admin panel at:
+
+```
+https://ksleow.com/admin
+```
+
+Editors log in with **GitHub** and edit the homepage through a friendly form.
+Saving publishes a commit to `main` → Vercel rebuilds → changes go live in ~30 seconds.
+
+### Editable sections
+Hero · Stats Bar · Services · Products · Case Studies · Partners · Careers · Footer.
+Each section corresponds to one JSON file under [`src/content/`](src/content/).
+
+### Image uploads
+Files uploaded through the CMS land in [`public/uploads/`](public/uploads/) and are
+referenced from the rendered page as `/uploads/<filename>`. They are committed
+to the repo, so they're versioned alongside the content.
+
+### One-time setup (already done — kept here for reference)
+
+1. **Create a GitHub OAuth App** at <https://github.com/settings/developers>
+   - Application name: `KSL Content Manager`
+   - Homepage URL: `https://ksleow.com`
+   - Authorization callback URL: `https://YOUR-WORKER.workers.dev/callback`
+2. **Add two Worker env vars** in the Cloudflare dashboard:
+   - `OAUTH_GITHUB_CLIENT_ID`
+   - `OAUTH_GITHUB_CLIENT_SECRET`
+3. **Set the Worker URL** in [`public/admin/config.yml`](public/admin/config.yml) → `backend.base_url`.
+4. **Invite admins** as collaborators on the GitHub repo (Settings → Collaborators).
+   Anyone with write access to `main` can log in and edit content.
+
+---
+
 ## ✏️ How to Update Content
+
+> **For non-developer admins:** use `/admin` (see section above).
+> The notes below are for developers editing files directly.
 
 ### Contact Information
 Edit **one file** — `src/constants/contact.js`:
@@ -95,10 +147,15 @@ All components (Nav, Footer, Modal) automatically use these values.
 Swap out `src/assets/logos/ksl_logo.png` with the new file (keep the same filename).
 
 ### Add / Remove Services
-Edit the `SERVICES` array at the top of `src/components/Services.jsx`.
+Edit `src/content/services.json` — or use the admin panel.
 
 ### Add / Remove Products
-Edit the `PRODUCTS` array at the top of `src/components/Products.jsx`.
+Edit `src/content/products.json` — or use the admin panel.
+
+### Other section content
+All editable homepage copy lives in `src/content/`:
+`hero.json`, `stats.json`, `services.json`, `products.json`,
+`caseStudies.json`, `partners.json`, `careers.json`, `footer.json`.
 
 ---
 

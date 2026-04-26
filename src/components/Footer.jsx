@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { LOGO_FOOTER } from "../assets/assets.js";
 import { CONTACT, WA_LINK } from "../constants/contact.js";
+import footer from "../content/footer.json";
 
 const Icon = ({ d, size = 14 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24"
@@ -55,14 +56,13 @@ export default function Footer() {
               <img src={LOGO_FOOTER} alt="KSL Business Solutions"
                 style={{ height: 46, objectFit: "contain", display: "block", marginBottom: "1.1rem", filter: "brightness(0) invert(1)" }} />
               <p style={{ fontSize: "0.83rem", color: "#7b7fa8", lineHeight: 1.82, maxWidth: 300 }}>
-                K.S. Leow Group — established 1981. Pahang's leading AutoCount
-                Authorized Dealer and full-service professional firm.
+                {footer.tagline}
               </p>
             </div>
 
             {/* Contact */}
             <div>
-              <h4 style={H4}>Contact Us</h4>
+              <h4 style={H4}>{footer.contactHeading}</h4>
               <ContactRow icon={IC.mapPin} label={CONTACT.address} />
               <ContactRow icon={IC.phone}  href={`tel:${CONTACT.phone}`}    label={CONTACT.phone} />
               <ContactRow icon={IC.mail}   href={`mailto:${CONTACT.email}`} label={CONTACT.email} />
@@ -72,15 +72,15 @@ export default function Footer() {
 
             {/* Services */}
             <div>
-              <h4 style={H4}>Services</h4>
-              {["Accounting","Secretarial","Taxation","Management","Auditing",
-                "Computer Hardware & Technical","Professional Training","Plugin Development"]
-                .map(s => <span key={s} style={{ display: "block", fontSize: "0.82rem", color: "#7b7fa8", lineHeight: 2.05 }}>{s}</span>)}
+              <h4 style={H4}>{footer.servicesHeading}</h4>
+              {(footer.services || []).map(s => (
+                <span key={s} style={{ display: "block", fontSize: "0.82rem", color: "#7b7fa8", lineHeight: 2.05 }}>{s}</span>
+              ))}
             </div>
 
             {/* Follow */}
             <div>
-              <h4 style={H4}>Follow Us</h4>
+              <h4 style={H4}>{footer.followHeading}</h4>
               <ContactRow icon={IC.facebook} href={CONTACT.facebook} label="Facebook" external />
               <ContactRow icon={IC.whatsapp} href={WA_LINK}          label="WhatsApp"  external />
             </div>
@@ -91,8 +91,8 @@ export default function Footer() {
       </footer>
 
       <div style={{ background: "#13142a", padding: "1.1rem 0", textAlign: "center", fontSize: "0.75rem", color: "#55587a", lineHeight: 1.9 }}>
-        <div>© {new Date().getFullYear()} KSL Business Solutions Sdn. Bhd. All rights reserved.</div>
-        <div>Mentakab, Pahang, Malaysia</div>
+        <div>© {new Date().getFullYear()} {footer.copyrightLine}</div>
+        <div>{footer.locationLine}</div>
       </div>
     </>
   );

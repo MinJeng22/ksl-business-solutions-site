@@ -1,44 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import productsContent from "../content/products.json";
 
-/*
- * PRODUCT IMAGE SLOTS
- * ───────────────────
- * To add a real product logo:
- *   1. Drop PNG into  src/assets/images/products/
- *   2. Import + assign in src/assets/assets.js (PRODUCT_IMAGES)
- *   3. Replace  img: null  below with the imported variable
- */
-const PRODUCTS = [
-  {
-    name: "AutoCount Accounting",
-    desc: "Malaysia's leading cloud and desktop accounting software. Full SST and e-Invoice ready.",
-    img: null, placeholder: "🧾",
-    gradient: "linear-gradient(135deg, #2f315a 0%, #4a4d85 100%)",
-    route: "/products/autocount-accounting",
-  },
-  {
-    name: "AutoCount POS",
-    desc: "POS integrated with AutoCount Accounting. Real-time inventory and sales reporting.",
-    img: null, placeholder: "🖥️",
-    gradient: "linear-gradient(135deg, #1e2040 0%, #3a3d6b 100%)",
-    route: null,
-  },
-  {
-    name: "AutoCount Cloud Payroll",
-    desc: "Automated payroll compliant with EPF, SOCSO, PCB, and EIS. Payslips in minutes.",
-    img: null, placeholder: "☁️",
-    gradient: "linear-gradient(135deg, #2a2f60 0%, #565a9e 100%)",
-    route: null,
-  },
-  {
-    name: "FeedMe POS",
-    desc: "Cloud F&B POS with table management, kitchen display, and online ordering integration.",
-    img: null, placeholder: "🍽️",
-    gradient: "linear-gradient(135deg, #4a2e0a 0%, #a06c2a 100%)",
-    route: null,
-  },
-];
+const PRODUCTS = (productsContent.items || []).map(p => ({
+  name:        p.name,
+  desc:        p.desc,
+  img:         p.image  || null,
+  placeholder: p.placeholder,
+  gradient:    p.gradient,
+  route:       p.route   || null,
+}));
 
 export default function Products({ onContact }) {
   const [hovered, setHovered] = useState(null);
@@ -48,13 +19,13 @@ export default function Products({ onContact }) {
     <section style={{ background: "#2f315a", padding: "6rem 0" }}>
       <div className="content-wrap">
         <div style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c9a84c", marginBottom: "0.75rem" }}>
-          Our Products
+          {productsContent.eyebrow}
         </div>
         <h2 style={{ fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 700, color: "#ffffff", lineHeight: 1.2, marginBottom: "0.75rem" }}>
-          Software We Specialize In
+          {productsContent.heading}
         </h2>
         <p style={{ fontSize: "1rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.75, maxWidth: 540, marginBottom: "3rem" }}>
-          We are certified partners for Malaysia's leading accounting and business software solutions.
+          {productsContent.intro}
         </p>
 
         <div className="products-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.25rem" }}>

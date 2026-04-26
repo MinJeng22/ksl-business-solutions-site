@@ -1,5 +1,5 @@
 /**
- * Cloudflare Worker — KSL Sales2DO AI Backend
+ * Cloudflare Worker — KSL Sales2DO AI Backend + Decap CMS OAuth
  * ═════════════════════════════════════════════════════════════════
  *
  * SETUP STEPS:
@@ -13,7 +13,19 @@
  *      GCS_BUCKET          — your Google Cloud Storage bucket name
  *      ALLOWED_ORIGIN      — your frontend URL e.g. https://ksleow.com
  *
+ *    For the Decap CMS admin (/admin) login, also add:
+ *      OAUTH_GITHUB_CLIENT_ID     — GitHub OAuth App Client ID
+ *      OAUTH_GITHUB_CLIENT_SECRET — GitHub OAuth App Client Secret
+ *
  * 4. Set your Worker URL in AIChatbot.jsx → WORKER_URL constant
+ * 5. Set the same Worker URL in public/admin/config.yml → backend.base_url
+ *
+ * GITHUB OAUTH APP SETUP (one time, ~2 min):
+ *   • Visit:  https://github.com/settings/developers  →  "New OAuth App"
+ *   • Application name:        KSL Content Manager
+ *   • Homepage URL:            https://ksleow.com
+ *   • Authorization callback:  https://YOUR-WORKER.workers.dev/callback
+ *   • Generate a client secret, then save both values as Worker env vars above.
  *
  * GOOGLE CLOUD SETUP:
  *   • Enable:  Cloud Storage API, Vertex AI API
@@ -137,6 +149,80 @@ async function generateSignedUrl(env, ext) {
   return { signedUrl, gsPath };
 }
 
+/* ══════════════════════════════════════════════════════════════
+ * Decap CMS — GitHub OAuth proxy
+ * ──────────────────────────────────────────────────────────────
+ * Decap opens /oauth in a popup. We redirect to GitHub, GitHub
+ * redirects to /callback with a code, we exchange it for an
+ * access token, then post the token back to the opener window
+ * using the message format Decap expects.
+ * ══════════════════════════════════════════════════════════════ */
+
+function oauthRedirect(env, request) {
+  const url      = new URL(request.url);
+  const callback = `${url.origin}/callback`;
+  const state    = crypto.randomUUID();
+  const auth = new URL("https://github.com/login/oauth/authorize");
+  auth.searchParams.set("client_id",    env.OAUTH_GITHUB_CLIENT_ID);
+  auth.searchParams.set("redirect_uri", callback);
+  auth.searchParams.set("scope",        "repo,user");
+  auth.searchParams.set("state",        state);
+  return Response.redirect(auth.toString(), 302);
+}
+
+async function oauthCallback(env, request) {
+  const url  = new URL(request.url);
+  const code = url.searchParams.get("code");
+  if (!code) {
+    return new Response("Missing ?code parameter from GitHub", { status: 400 });
+  }
+
+  let token, error;
+  try {
+    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id:     env.OAUTH_GITHUB_CLIENT_ID,
+        client_secret: env.OAUTH_GITHUB_CLIENT_SECRET,
+        code,
+      }),
+    });
+    const data = await tokenRes.json();
+    if (data.error)         error = data.error_description || data.error;
+    else if (data.access_token) token = data.access_token;
+    else                        error = "No access_token in GitHub response";
+  } catch (e) {
+    error = e.message;
+  }
+
+  // Decap expects: window.opener.postMessage("authorization:github:<status>:<json>", "*")
+  const status  = error ? "error" : "success";
+  const payload = error ? { message: error } : { token, provider: "github" };
+  const msg     = `authorization:github:${status}:${JSON.stringify(payload)}`;
+
+  const html = `<!DOCTYPE html>
+<html><body>
+<script>
+  (function() {
+    function send(target) {
+      target.postMessage(${JSON.stringify(msg)}, "*");
+    }
+    window.addEventListener("message", function (e) {
+      if (e.data === "authorizing:github" && window.opener) send(window.opener);
+    }, false);
+    if (window.opener) {
+      send(window.opener);
+      setTimeout(function () { window.close(); }, 600);
+    } else {
+      document.body.innerText = ${JSON.stringify(error ? "Login failed: " + error : "Logged in. You can close this window.")};
+    }
+  })();
+</script>
+</body></html>`;
+  return new Response(html, { headers: { "Content-Type": "text/html" } });
+}
+
 /* ── Main fetch handler ── */
 export default {
   async fetch(request, env) {
@@ -147,6 +233,10 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: cors(env) });
     }
+
+    /* ── Decap CMS OAuth (GitHub) ── */
+    if (url.pathname === "/oauth")    return oauthRedirect(env, request);
+    if (url.pathname === "/callback") return oauthCallback(env, request);
 
     /* ── Route: POST /signed-url ── */
     if (url.pathname === "/signed-url" && request.method === "POST") {
