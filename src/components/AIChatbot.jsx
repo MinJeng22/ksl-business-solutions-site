@@ -16,7 +16,7 @@ import { useState, useRef, useEffect } from "react";
  * ══════════════════════════════════════════════════════════════ */
 
 /* ── CONFIG — set your Cloudflare Worker URL here ── */
-const WORKER_URL = "https://ksl-omni.chiaminjeng.workers.dev";
+const WORKER_URL = "hksl-omni.kslbs.workers.dev";
 /* ── Icons ── */
 const SendIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
