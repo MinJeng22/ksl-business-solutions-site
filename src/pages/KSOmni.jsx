@@ -5,9 +5,30 @@ import Footer from "../components/Footer";
 const WORKER_URL = "https://ksl-omni.chiaminjeng.workers.dev";
 const PAGE_URL   = "https://ksl-business-solutions-site.vercel.app/omni";
 
-/* Max paste-image size — 5 MB before base64. Anything bigger gets rejected
- * to keep the request payload sane. */
+/* Max original file size before canvas conversion. */
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Convert any pasted image (PNG, WebP, GIF, …) to a JPEG data URL via canvas.
+ * JPEG is required by the GCS signed URL the worker generates (content-type is
+ * hardcoded to image/jpeg in the V4 signing canonical request).
+ */
+function toJpegDataUrl(file, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width  = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext("2d").drawImage(img, 0, 0);
+      URL.revokeObjectURL(objectUrl);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error("Failed to decode image")); };
+    img.src = objectUrl;
+  });
+}
 
 /* ── QR Code modal — includes machineId in URL if present ── */
 function QRModal({ onClose, machineId }) {
@@ -135,10 +156,10 @@ function Message({ msg }) {
         </div>
       )}
       <div style={{ maxWidth: "78%", display: "flex", flexDirection: "column", gap: "0.35rem", alignItems: isUser ? "flex-end" : "flex-start" }}>
-        {/* Pasted image preview inside the bubble */}
-        {msg.image_base64 && (
+        {/* Pasted image preview inside the bubble (local data URL, not the GCS URI) */}
+        {msg.imagePreviewUrl && (
           <img
-            src={`data:${msg.image_mime || "image/png"};base64,${msg.image_base64}`}
+            src={msg.imagePreviewUrl}
             alt="attachment"
             style={{
               maxWidth: 220, maxHeight: 220, borderRadius: 12,
@@ -219,7 +240,7 @@ export default function KSLOmniPage() {
   const [input, setInput]                  = useState("");
   const [loading, setLoading]              = useState(false);
   const [showQR, setShowQR]                = useState(false);
-  const [attachedImage, setAttachedImage]  = useState(null);   /* { base64, mime, dataUrl, sizeKb } */
+  const [attachedImage, setAttachedImage]  = useState(null);   /* { gsPath, dataUrl, sizeKb, uploading } */
   const [pasteError, setPasteError]        = useState("");
 
   /* ── Read Machine ID from URL query param (?mid=XXXX) ── */
@@ -267,12 +288,11 @@ export default function KSLOmniPage() {
   }
 
   /* ── Capture image from clipboard paste ── */
-  function handlePaste(e) {
+  async function handlePaste(e) {
     const items = e.clipboardData?.items;
     if (!items) return;
     for (const item of items) {
-      if (item.kind !== "file") continue;
-      if (!item.type.startsWith("image/")) continue;
+      if (item.kind !== "file" || !item.type.startsWith("image/")) continue;
       const file = item.getAsFile();
       if (!file) continue;
       if (file.size > MAX_IMAGE_BYTES) {
@@ -282,25 +302,41 @@ export default function KSLOmniPage() {
       }
       e.preventDefault();
       setPasteError("");
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const dataUrl = ev.target.result;
-        const base64  = String(dataUrl).split(",")[1] || "";
-        setAttachedImage({
-          base64,
-          mime:    file.type || "image/png",
-          dataUrl: String(dataUrl),
-          sizeKb:  Math.round(file.size / 1024),
+      setAttachedImage(null);
+
+      try {
+        /* 1. Convert to JPEG via canvas (required format for GCS signed URL) */
+        const dataUrl = await toJpegDataUrl(file);
+        const base64  = dataUrl.split(",")[1] ?? "";
+        const sizeKb  = Math.round(base64.length * 0.75 / 1024); // decoded size
+
+        /* 2. Show chip with spinner immediately so the user knows something is happening */
+        setAttachedImage({ gsPath: null, dataUrl, sizeKb, uploading: true });
+
+        /* 3. POST base64 to worker → worker generates signed URL → PUTs to GCS */
+        const res = await fetch(`${WORKER_URL}/upload`, {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ image_base64: base64 }),
         });
-      };
-      reader.readAsDataURL(file);
+        if (!res.ok) throw new Error(`Upload error ${res.status}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        /* 4. Image is on GCS — store the path reference, drop the base64 */
+        setAttachedImage({ gsPath: data.gsPath, dataUrl, sizeKb, uploading: false });
+      } catch (err) {
+        setAttachedImage(null);
+        setPasteError(`Failed to upload image: ${err.message}`);
+      }
       return;
     }
   }
 
   async function sendMessage() {
     const text = input.trim();
-    if ((!text && !attachedImage) || loading) return;
+    const hasImage = attachedImage?.gsPath && !attachedImage?.uploading;
+    if ((!text && !hasImage) || loading || attachedImage?.uploading) return;
 
     /* Snapshot the attached image, then clear input + preview */
     const img = attachedImage;
@@ -309,10 +345,11 @@ export default function KSLOmniPage() {
     setPasteError("");
     setLoading(true);
 
+    /* imagePreviewUrl is kept in messages state for display only — never sent to worker */
     const userMsg = {
       role: "user",
       text,
-      ...(img ? { image_base64: img.base64, image_mime: img.mime } : {}),
+      ...(img?.gsPath ? { gsPath: img.gsPath, imagePreviewUrl: img.dataUrl } : {}),
     };
     setMessages(prev => [...prev, userMsg]);
     setMessages(prev => [...prev, { role: "assistant", text: "", streaming: true }]);
@@ -325,13 +362,14 @@ export default function KSLOmniPage() {
         body: JSON.stringify({
           messages: [
             ...messages
-              .filter(m => (m.text || m.image_base64) && !m.streaming && !m.error)
+              .filter(m => (m.text || m.gsPath) && !m.streaming && !m.error)
               .map(m => ({
                 role: m.role,
                 text: m.text || "",
-                ...(m.image_base64 ? { image_base64: m.image_base64, image_mime: m.image_mime } : {}),
+                ...(m.gsPath ? { gsPath: m.gsPath } : {}),
+                /* imagePreviewUrl intentionally omitted — display-only */
               })),
-            userMsg,
+            { role: "user", text, ...(img?.gsPath ? { gsPath: img.gsPath } : {}) },
           ],
           machine_id: machineId || undefined,
         }),
@@ -421,6 +459,7 @@ export default function KSLOmniPage() {
   /* ── Reusable: pasted-image preview chip + error banner ── */
   function AttachmentChip() {
     if (!attachedImage && !pasteError) return null;
+    const { dataUrl, sizeKb, uploading } = attachedImage || {};
     return (
       <div style={{ padding: "0.5rem 0.75rem 0", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
         {attachedImage && (
@@ -430,17 +469,27 @@ export default function KSLOmniPage() {
             borderRadius: 12, padding: "0.4rem 0.5rem 0.4rem 0.4rem",
             maxWidth: "100%",
           }}>
-            <img src={attachedImage.dataUrl} alt="paste preview"
-              style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8, display: "block" }} />
+            {/* Thumbnail or spinner */}
+            {uploading ? (
+              <div style={{ width: 44, height: 44, borderRadius: 8, background: "#e4e5f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <div style={{ width: 18, height: 18, border: "2px solid rgba(47,49,90,0.15)", borderTopColor: "#2f315a", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+              </div>
+            ) : (
+              <img src={dataUrl} alt="paste preview"
+                style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8, display: "block", flexShrink: 0 }} />
+            )}
             <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.25 }}>
               <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#2f315a" }}>Pasted image</span>
-              <span style={{ fontSize: "0.68rem", color: "#6b6f91" }}>{attachedImage.sizeKb} KB</span>
+              <span style={{ fontSize: "0.68rem", color: "#6b6f91" }}>{uploading ? "Uploading…" : `${sizeKb} KB`}</span>
             </div>
-            <button
-              onClick={() => setAttachedImage(null)}
-              title="Remove attachment"
-              style={{ width: 22, height: 22, borderRadius: "50%", background: "rgba(47,49,90,0.08)", border: "none", color: "#2f315a", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", marginLeft: 4 }}
-            ><CloseSmallIcon /></button>
+            {/* ✕ only available after upload completes */}
+            {!uploading && (
+              <button
+                onClick={() => setAttachedImage(null)}
+                title="Remove attachment"
+                style={{ width: 22, height: 22, borderRadius: "50%", background: "rgba(47,49,90,0.08)", border: "none", color: "#2f315a", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", marginLeft: 4 }}
+              ><CloseSmallIcon /></button>
+            )}
           </div>
         )}
         {pasteError && (
@@ -535,13 +584,13 @@ export default function KSLOmniPage() {
           />
           <button
             onClick={sendMessage}
-            disabled={loading || (!input.trim() && !attachedImage)}
+            disabled={loading || attachedImage?.uploading || (!input.trim() && !attachedImage?.gsPath)}
             style={{
               width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
-              background: (loading || (!input.trim() && !attachedImage)) ? "rgba(47,49,90,0.12)" : "#2f315a",
+              background: (loading || attachedImage?.uploading || (!input.trim() && !attachedImage?.gsPath)) ? "rgba(47,49,90,0.12)" : "#2f315a",
               border: "none",
-              color: (loading || (!input.trim() && !attachedImage)) ? "#a8abcc" : "#ffffff",
-              cursor:  (loading || (!input.trim() && !attachedImage)) ? "not-allowed" : "pointer",
+              color: (loading || attachedImage?.uploading || (!input.trim() && !attachedImage?.gsPath)) ? "#a8abcc" : "#ffffff",
+              cursor:  (loading || attachedImage?.uploading || (!input.trim() && !attachedImage?.gsPath)) ? "not-allowed" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}
           >
@@ -635,18 +684,18 @@ export default function KSLOmniPage() {
               />
               <button
                 onClick={sendMessage}
-                disabled={loading || (!input.trim() && !attachedImage)}
+                disabled={loading || attachedImage?.uploading || (!input.trim() && !attachedImage?.gsPath)}
                 style={{
                   width: 40, height: 40, borderRadius: "50%",
-                  background: (loading || (!input.trim() && !attachedImage)) ? "rgba(47,49,90,0.12)" : "#2f315a",
+                  background: (loading || attachedImage?.uploading || (!input.trim() && !attachedImage?.gsPath)) ? "rgba(47,49,90,0.12)" : "#2f315a",
                   border: "none",
-                  color: (loading || (!input.trim() && !attachedImage)) ? "#a8abcc" : "#ffffff",
-                  cursor:  (loading || (!input.trim() && !attachedImage)) ? "not-allowed" : "pointer",
+                  color: (loading || attachedImage?.uploading || (!input.trim() && !attachedImage?.gsPath)) ? "#a8abcc" : "#ffffff",
+                  cursor:  (loading || attachedImage?.uploading || (!input.trim() && !attachedImage?.gsPath)) ? "not-allowed" : "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   flexShrink: 0, transition: "background 0.2s",
                 }}
-                onMouseOver={e => { if (!loading && (input.trim() || attachedImage)) e.currentTarget.style.background = "#3d4075"; }}
-                onMouseOut={e => { if (!loading && (input.trim() || attachedImage)) e.currentTarget.style.background = "#2f315a"; }}
+                onMouseOver={e => { if (!loading && !attachedImage?.uploading && (input.trim() || attachedImage?.gsPath)) e.currentTarget.style.background = "#3d4075"; }}
+                onMouseOut={e => { if (!loading && !attachedImage?.uploading && (input.trim() || attachedImage?.gsPath)) e.currentTarget.style.background = "#2f315a"; }}
               >
                 {loading
                   ? <div style={{ width: 15, height: 15, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
