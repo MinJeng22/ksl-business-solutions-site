@@ -30,10 +30,9 @@ function toJpegDataUrl(file, quality = 0.85) {
   });
 }
 
-/* ── QR Code modal — includes machineId in URL if present ── */
-function QRModal({ onClose, machineId }) {
-  const pageUrl = machineId ? `${PAGE_URL}?mid=${encodeURIComponent(machineId)}` : PAGE_URL;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pageUrl)}&bgcolor=ffffff&color=2f315a&margin=12`;
+/* ── QR Code modal ── */
+function QRModal({ onClose }) {
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(PAGE_URL)}&bgcolor=ffffff&color=2f315a&margin=12`;
   return (
     <div onClick={onClose} style={{
       position: "fixed", inset: 0, zIndex: 9999,
@@ -52,18 +51,12 @@ function QRModal({ onClose, machineId }) {
         <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#2f315a", marginBottom: "0.4rem" }}>Open on Mobile</h3>
         <p style={{ fontSize: "0.78rem", color: "#6b6f91", lineHeight: 1.6, marginBottom: "1.25rem" }}>
           Scan this QR code with your phone to open KS Omni on your mobile device.
-          {machineId && " Your Machine ID will be carried over automatically."}
         </p>
         <div style={{ display: "inline-block", padding: "0.75rem", borderRadius: 16, border: "2px solid rgba(47,49,90,0.1)", background: "#f8f8fb", marginBottom: "1.25rem" }}>
           <img src={qrUrl} alt="QR code" width={200} height={200} style={{ display: "block", borderRadius: 8 }} />
         </div>
-        {machineId && (
-          <div style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", borderRadius: 10, padding: "0.5rem 0.85rem", fontSize: "0.72rem", color: "#8a6a10", fontWeight: 600, marginBottom: "0.75rem" }}>
-            🔗 Machine ID: {machineId}
-          </div>
-        )}
         <div style={{ background: "#f0f0f6", borderRadius: 10, padding: "0.55rem 0.85rem", fontSize: "0.68rem", color: "#6b6f91", fontFamily: "monospace", wordBreak: "break-all", marginBottom: "1.25rem" }}>
-          {pageUrl}
+          {PAGE_URL}
         </div>
         <button onClick={onClose} style={{
           width: "100%", padding: "0.7rem", background: "#2f315a", color: "#ffffff",
@@ -194,7 +187,7 @@ function Message({ msg }) {
 }
 
 /* ── Gemini-style empty-state greeting (shown until user sends first msg) ── */
-function EmptyGreeting({ machineId }) {
+function EmptyGreeting() {
   return (
     <div style={{
       flex: 1, display: "flex", flexDirection: "column",
@@ -211,11 +204,6 @@ function EmptyGreeting({ machineId }) {
       <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2.1rem)", fontWeight: 600, color: "#2f315a", lineHeight: 1.25, marginBottom: "0.5rem" }}>
         Hello, how can I assist you today?
       </h2>
-      {machineId && (
-        <div style={{ marginTop: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.3)", borderRadius: 50, padding: "0.3rem 0.85rem", fontSize: "0.7rem", color: "#8a6a10", fontWeight: 600 }}>
-          🔗 Machine ID: {machineId}
-        </div>
-      )}
     </div>
   );
 }
@@ -242,12 +230,6 @@ export default function KSLOmniPage() {
   const [showQR, setShowQR]                = useState(false);
   const [attachedImage, setAttachedImage]  = useState(null);   /* { gsPath, dataUrl, sizeKb, uploading } */
   const [pasteError, setPasteError]        = useState("");
-
-  /* ── Read Machine ID from URL query param (?mid=XXXX) ── */
-  const [machineId] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("mid") || null;
-  });
 
   const inputRef     = useRef(null);
   const abortRef     = useRef(null);
@@ -371,7 +353,6 @@ export default function KSLOmniPage() {
               })),
             { role: "user", text, ...(img?.gsPath ? { gsPath: img.gsPath } : {}) },
           ],
-          machine_id: machineId || undefined,
         }),
         signal: abortRef.current.signal,
       });
@@ -534,7 +515,7 @@ export default function KSLOmniPage() {
             <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KS Omni</div>
             <div style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block", flexShrink: 0 }} />
-              {machineId ? `Machine ID: ${machineId}` : "AutoCount Plugin AI Assistant"}
+              K.S. Leow Group AI Assistant
             </div>
           </div>
           <button onClick={clearChat} title="Clear chat" aria-label="Clear chat"
@@ -548,7 +529,7 @@ export default function KSLOmniPage() {
         {/* Messages OR empty greeting */}
         <div ref={chatScrollRef} style={{ flex: 1, overflowY: "auto", padding: isEmpty ? 0 : "1rem", display: "flex", flexDirection: "column" }}>
           {isEmpty
-            ? <EmptyGreeting machineId={machineId} />
+            ? <EmptyGreeting />
             : messages.map((msg, i) => <Message key={i} msg={msg} />)
           }
         </div>
@@ -600,7 +581,7 @@ export default function KSLOmniPage() {
             }
           </button>
         </div>
-        {showQR && <QRModal onClose={() => setShowQR(false)} machineId={machineId} />}
+        {showQR && <QRModal onClose={() => setShowQR(false)} />}
       </div>
     );
   }
@@ -648,7 +629,7 @@ export default function KSLOmniPage() {
           }}>
             <div ref={chatScrollRef} style={{ flex: 1, overflowY: "auto", padding: isEmpty ? 0 : "1.5rem 1.75rem", display: "flex", flexDirection: "column" }}>
               {isEmpty
-                ? <EmptyGreeting machineId={machineId} />
+                ? <EmptyGreeting />
                 : messages.map((msg, i) => <Message key={i} msg={msg} />)
               }
             </div>
@@ -712,7 +693,7 @@ export default function KSLOmniPage() {
       </div>
 
       <Footer />
-      {showQR && <QRModal onClose={() => setShowQR(false)} machineId={machineId} />}
+      {showQR && <QRModal onClose={() => setShowQR(false)} />}
     </div>
   );
 }
