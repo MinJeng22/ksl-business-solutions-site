@@ -267,8 +267,13 @@ export default {
       // Build Vertex AI contents array
       const contents = messages.map(m => {
         const parts = [];
+        // GCS-hosted image (legacy / upload flow)
         if (m.gsPath) {
-          parts.push({ fileData: { mimeType: "image/jpeg", fileUri: m.gsPath } });
+          parts.push({ fileData: { mimeType: m.image_mime || "image/jpeg", fileUri: m.gsPath } });
+        }
+        // Inline base64 image pasted from clipboard (new paste flow)
+        if (m.image_base64) {
+          parts.push({ inlineData: { mimeType: m.image_mime || "image/jpeg", data: m.image_base64 } });
         }
         if (m.text) parts.push({ text: m.text });
         return { role: m.role === "assistant" ? "model" : "user", parts };
