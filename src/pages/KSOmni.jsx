@@ -31,8 +31,9 @@ function toJpegDataUrl(file, quality = 0.85) {
 }
 
 /* ── QR Code modal ── */
-function QRModal({ onClose }) {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(PAGE_URL)}&bgcolor=ffffff&color=2f315a&margin=12`;
+function QRModal({ onClose, machineId }) {
+  const pageUrl = machineId ? `${PAGE_URL}?mid=${encodeURIComponent(machineId)}` : PAGE_URL;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pageUrl)}&bgcolor=ffffff&color=2f315a&margin=12`;
   return (
     <div onClick={onClose} style={{
       position: "fixed", inset: 0, zIndex: 9999,
@@ -56,7 +57,7 @@ function QRModal({ onClose }) {
           <img src={qrUrl} alt="QR code" width={200} height={200} style={{ display: "block", borderRadius: 8 }} />
         </div>
         <div style={{ background: "#f0f0f6", borderRadius: 10, padding: "0.55rem 0.85rem", fontSize: "0.68rem", color: "#6b6f91", fontFamily: "monospace", wordBreak: "break-all", marginBottom: "1.25rem" }}>
-          {PAGE_URL}
+          {pageUrl}
         </div>
         <button onClick={onClose} style={{
           width: "100%", padding: "0.7rem", background: "#2f315a", color: "#ffffff",
@@ -231,6 +232,12 @@ export default function KSLOmniPage() {
   const [attachedImage, setAttachedImage]  = useState(null);   /* { gsPath, dataUrl, sizeKb, uploading } */
   const [pasteError, setPasteError]        = useState("");
 
+  /* Machine ID read from URL (?mid=XXXX) — passed to worker silently, not shown in UI */
+  const [machineId] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("mid") || null;
+  });
+
   const inputRef     = useRef(null);
   const abortRef     = useRef(null);
   const chatScrollRef = useRef(null);
@@ -353,6 +360,7 @@ export default function KSLOmniPage() {
               })),
             { role: "user", text, ...(img?.gsPath ? { gsPath: img.gsPath } : {}) },
           ],
+          ...(machineId ? { machine_id: machineId } : {}),
         }),
         signal: abortRef.current.signal,
       });
@@ -581,7 +589,7 @@ export default function KSLOmniPage() {
             }
           </button>
         </div>
-        {showQR && <QRModal onClose={() => setShowQR(false)} />}
+        {showQR && <QRModal onClose={() => setShowQR(false)} machineId={machineId} />}
       </div>
     );
   }
@@ -693,7 +701,7 @@ export default function KSLOmniPage() {
       </div>
 
       <Footer />
-      {showQR && <QRModal onClose={() => setShowQR(false)} />}
+      {showQR && <QRModal onClose={() => setShowQR(false)} machineId={machineId} />}
     </div>
   );
 }
