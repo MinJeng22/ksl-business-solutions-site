@@ -464,51 +464,6 @@ export default function KSLOmniPage() {
     );
   }
 
-  /* ── Reusable: pasted-image preview chip + error banner ── */
-  function AttachmentChip() {
-    if (!attachedImage && !pasteError) return null;
-    const { dataUrl, sizeKb, uploading } = attachedImage || {};
-    return (
-      <div style={{ padding: "0.5rem 0.75rem 0", display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-        {attachedImage && (
-          <div style={{
-            display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "0.6rem",
-            background: "#f0f0f6", border: "1px solid rgba(47,49,90,0.12)",
-            borderRadius: 12, padding: "0.4rem 0.5rem 0.4rem 0.4rem",
-            maxWidth: "100%",
-          }}>
-            {/* Thumbnail or spinner */}
-            {uploading ? (
-              <div style={{ width: 44, height: 44, borderRadius: 8, background: "#e4e5f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <div style={{ width: 18, height: 18, border: "2px solid rgba(47,49,90,0.15)", borderTopColor: "#2f315a", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
-              </div>
-            ) : (
-              <img src={dataUrl} alt="paste preview"
-                style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8, display: "block", flexShrink: 0 }} />
-            )}
-            <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.25 }}>
-              <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#2f315a" }}>Pasted image</span>
-              <span style={{ fontSize: "0.68rem", color: "#6b6f91" }}>{uploading ? "Uploading…" : `${sizeKb} KB`}</span>
-            </div>
-            {/* ✕ only available after upload completes */}
-            {!uploading && (
-              <button
-                onClick={() => setAttachedImage(null)}
-                title="Remove attachment"
-                style={{ width: 22, height: 22, borderRadius: "50%", background: "rgba(47,49,90,0.08)", border: "none", color: "#2f315a", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", marginLeft: 4 }}
-              ><CloseSmallIcon /></button>
-            )}
-          </div>
-        )}
-        {pasteError && (
-          <div style={{ fontSize: "0.75rem", color: "#991b1b", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "0.4rem 0.65rem" }}>
-            {pasteError}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   /* ══════════════════════════════════════════════════════════
    * MOBILE: fullscreen chat
    * ══════════════════════════════════════════════════════════ */
@@ -561,8 +516,6 @@ export default function KSLOmniPage() {
           }
         </div>
 
-        <AttachmentChip />
-
         {/* Hidden file input for the upload button */}
         <input
           ref={fileInputRef}
@@ -583,6 +536,38 @@ export default function KSLOmniPage() {
           display: "flex", flexDirection: "column", gap: "0.35rem",
           flexShrink: 0,
         }}>
+          {/* Inline image preview thumbnail (inside the input container) */}
+          {attachedImage && (
+            <div style={{ position: "relative", display: "inline-block", alignSelf: "flex-start", margin: "0.1rem 0 0.2rem" }}>
+              {attachedImage.uploading ? (
+                <div style={{ width: 56, height: 56, borderRadius: 10, background: "#dadbe6", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 18, height: 18, border: "2px solid rgba(47,49,90,0.18)", borderTopColor: "#2f315a", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                </div>
+              ) : (
+                <img src={attachedImage.dataUrl} alt="attachment preview"
+                  style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 10, display: "block", border: "1px solid rgba(47,49,90,0.15)" }} />
+              )}
+              {!attachedImage.uploading && (
+                <button
+                  onClick={() => setAttachedImage(null)}
+                  title="Remove attachment"
+                  aria-label="Remove attachment"
+                  style={{
+                    position: "absolute", top: -6, right: -6,
+                    width: 20, height: 20, borderRadius: "50%",
+                    background: "#2f315a", color: "#ffffff",
+                    border: "2px solid #f0f0f6", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+                  }}
+                ><CloseSmallIcon /></button>
+              )}
+            </div>
+          )}
+          {pasteError && (
+            <div style={{ fontSize: "0.7rem", color: "#991b1b", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "0.3rem 0.55rem" }}>
+              {pasteError}
+            </div>
+          )}
           <textarea
             ref={inputRef}
             value={input}
@@ -647,8 +632,9 @@ export default function KSLOmniPage() {
    * input falls to the bottom once the conversation starts.
    * ══════════════════════════════════════════════════════════ */
 
-  /* Reusable Gemini-style input box — textarea on top, action row below.
-   * Same component in centered (empty state) and bottom (active chat) layouts. */
+  /* Reusable Gemini-style input box — image preview + textarea on top,
+   * action row below. Same component in centered (empty state) and
+   * bottom (active chat) layouts. */
   function InputRow({ centered = false }) {
     const sendDisabled = loading || attachedImage?.uploading || (!input.trim() && !attachedImage?.gsUri);
     const uploadBusy   = loading || attachedImage?.uploading;
@@ -664,7 +650,44 @@ export default function KSLOmniPage() {
         flexShrink: 0,
         transition: "border-color 0.2s, box-shadow 0.2s",
       }}>
-        {/* Top: textarea with no visible border, blends into the container */}
+        {/* Inline image preview thumbnail (sits inside the input container, above the textarea) */}
+        {attachedImage && (
+          <div style={{ position: "relative", display: "inline-block", alignSelf: "flex-start", margin: "0.15rem 0 0.25rem" }}>
+            {attachedImage.uploading ? (
+              <div style={{ width: 64, height: 64, borderRadius: 10, background: "#dadbe6", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: 20, height: 20, border: "2px solid rgba(47,49,90,0.18)", borderTopColor: "#2f315a", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+              </div>
+            ) : (
+              <img
+                src={attachedImage.dataUrl}
+                alt="attachment preview"
+                style={{ width: 64, height: 64, objectFit: "cover", borderRadius: 10, display: "block", border: "1px solid rgba(47,49,90,0.15)" }}
+              />
+            )}
+            {!attachedImage.uploading && (
+              <button
+                onClick={() => setAttachedImage(null)}
+                title="Remove attachment"
+                aria-label="Remove attachment"
+                style={{
+                  position: "absolute", top: -6, right: -6,
+                  width: 20, height: 20, borderRadius: "50%",
+                  background: "#2f315a", color: "#ffffff",
+                  border: "2px solid #f0f0f6", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  padding: 0,
+                }}
+              ><CloseSmallIcon /></button>
+            )}
+          </div>
+        )}
+        {pasteError && (
+          <div style={{ fontSize: "0.72rem", color: "#991b1b", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "0.3rem 0.55rem", margin: "0 0 0.15rem" }}>
+            {pasteError}
+          </div>
+        )}
+
+        {/* Textarea with no visible border, blends into the container */}
         <textarea
           ref={inputRef}
           value={input}
@@ -756,15 +779,15 @@ export default function KSLOmniPage() {
 
       {/* Chatbot header — navy bar with KS Omni branding + Back / QR / Clear actions */}
       <div style={{ background: "#2f315a", borderBottom: "1px solid rgba(0,0,0,0.2)" }}>
-        <div className="content-wrap" style={{ padding: "0.85rem var(--px)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
-            <div style={{ width: 36, height: 36, borderRadius: "50%", overflow: "hidden", border: "1.5px solid rgba(201,168,76,0.5)" }}>
+        <div className="content-wrap" style={{ padding: "1.4rem var(--px)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", minHeight: 80 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
+            <div style={{ width: 48, height: 48, borderRadius: "50%", overflow: "hidden", border: "1.5px solid rgba(201,168,76,0.55)" }}>
               <img src="/ksl-logo-circle.png" alt="KS Omni" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
             </div>
             <div>
-              <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "#ffffff", lineHeight: 1.15 }}>KS Omni</div>
-              <div style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
+              <div style={{ fontSize: "1.15rem", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>KS Omni</div>
+              <div style={{ fontSize: "0.74rem", color: "rgba(255,255,255,0.65)", display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", display: "inline-block" }} />
                 Powered by Gemini AI
               </div>
             </div>
@@ -793,7 +816,6 @@ export default function KSLOmniPage() {
               }}>
                 <EmptyGreeting />
                 <div style={{ width: "100%", maxWidth: 720 }}>
-                  <AttachmentChip />
                   <InputRow centered />
                 </div>
               </div>
@@ -803,7 +825,6 @@ export default function KSLOmniPage() {
                 <div ref={chatScrollRef} style={{ flex: 1, overflowY: "auto", padding: "1.5rem 1.75rem", display: "flex", flexDirection: "column" }}>
                   {messages.map((msg, i) => <Message key={i} msg={msg} />)}
                 </div>
-                <AttachmentChip />
                 <InputRow />
               </>
             )}
